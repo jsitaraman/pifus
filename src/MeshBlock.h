@@ -55,9 +55,9 @@ class MeshBlock
     x=xin;
   }
   
-  void setQ(double *qin) {q=qin;};
+  void setQ(int nvarin,double *qin) {nvar=nvarin;q=qin;};
 
-  void setTargets(int ntargets_in,double *xtargets_in,double *qtargets_in)
+  void setTargets(int nvar,int ntargets_in,double *xtargets_in,double *qtargets_in)
   {
     ntargets=ntargets_in;
     xtarget=xtargets_in;
@@ -69,6 +69,8 @@ class MeshBlock
   void search();
 
   void interpolate(int nvar);
+
+  ADT *getADT() {return adt;}
 };
 
 #endif 

@@ -14,13 +14,13 @@ extern "C" {
   {
     pf->registerGridData(*btag,*nnodes,x);
   }
-  void pifus_register_source_solution_(int *btag, double *q)
+  void pifus_register_source_solution_(int *btag, int *nvar,double *q)
   {
-    pf->registerSolution(*btag,q);
+    pf->registerSolution(*btag,*nvar,q);
   }
-  void pifus_register_targets_(int *btag, int *ntargets,double *x, double *q)
+  void pifus_register_targets_(int *btag, int *nvar, int *ntargets,double *x, double *q)
   {
-    pf->registerTargets(*btag,*ntargets,x,q);
+    pf->registerTargets(*btag,*nvar,*ntargets,x,q);
   }
   void pifus_interpolate_(int *nvar)
   {

@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/ccs/home/jsitaraman/pifus/src/buildADTrecursion.c
+pifus_types.h
+/ccs/home/jsitaraman/pifus/src/pifus_types.h
+
+/ccs/home/jsitaraman/pifus/src/pifus_types.h
+stdio.h
+-
+

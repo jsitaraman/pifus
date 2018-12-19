@@ -2,6 +2,9 @@
  * Generic Alternating Digital Tree For Search Operations
  */
 // forward declaration for instantiation
+#ifndef ADT_H
+#define ADT_H
+
 #include "pifus_types.h"
 #include <stdlib.h>
 class ADT
@@ -35,6 +38,12 @@ class ADT
       adtReals=NULL;
       adtExtents=NULL;
     };      
+  int *getadtIntegers(void) { return adtIntegers;}
+  int getadtnelem(void) {return nelem;}
+  double *getadtReals(void) {return adtReals;}
+  double *getadtExtents(void) {return adtExtents;}
+  double *getadtcoord(void) {return coord;}
   void buildADT(int d,int nelements,double *elementBbox);  
   void searchADTRegion(int *elemid,double *xsearch,double *vec);
 };
+#endif

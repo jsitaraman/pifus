@@ -9,6 +9,7 @@ void pifus::registerGridData(int btag, int nnodes, double *xyz)
   if (idxit== tag_iblk_map.end()) {
     mtags.push_back(btag);
     mblocks.push_back(std::unique_ptr<MeshBlock>(new MeshBlock));
+    dmblocks.push_back(std::unique_ptr<dMeshBlock>(new dMeshBlock));
     nblocks=mblocks.size();
     iblk=nblocks-1;
     tag_iblk_map[btag]=iblk;
@@ -18,23 +19,29 @@ void pifus::registerGridData(int btag, int nnodes, double *xyz)
   } 
   auto &mb = mblocks[iblk];
   mb->setData(btag,nnodes,xyz);
+  auto &dmb= dmblocks[iblk];
+  dmb->setData(btag,nnodes,xyz);
 }
   
-void pifus::registerSolution(int btag, double *q)
+void pifus::registerSolution(int btag, int nvar, double *q)
 {
   auto idxit=tag_iblk_map.find(btag);
   int iblk=idxit->second;
   auto &mb = mblocks[iblk];
-  mb->setQ(q);
+  auto &dmb= dmblocks[iblk];
+  mb->setQ(nvar,q);
+  dmb->setQ(nvar,q);
 }
 
-void pifus::registerTargets(int btag, int ntargets, double *targetxyz,
+void pifus::registerTargets(int btag, int nvar, int ntargets, double *targetxyz,
 			    double *targetq)
 {
   auto idxit=tag_iblk_map.find(btag);
   int iblk=idxit->second;
   auto &mb = mblocks[iblk];
-  mb->setTargets(ntargets,targetxyz,targetq);
+  auto &dmb = mblocks[iblk];
+  mb->setTargets(nvar,ntargets,targetxyz,targetq);
+  dmb->setTargets(nvar,ntargets,targetxyz,targetq);
 }
 
 void pifus::searchAndInterpolate(int nvar)
@@ -42,7 +49,9 @@ void pifus::searchAndInterpolate(int nvar)
   for (int ib=0;ib<nblocks;ib++)
     {
       auto &mb = mblocks[ib];
+      auto &dmb= dmblocks[ib];
       mb->preprocess();
+      dmb->preprocess(mb->getADT());
       mb->search();
       mb->interpolate(nvar);
     }

@@ -1,0 +1,5 @@
+typedef char __nv_bool;
+# 216 "/autofs/nccs-svm1_sw/summitdev/gcc/5.4.0new/lib/gcc/powerpc64le-none-linux-gnu/5.4.0/include/stddef.h" 3
+typedef unsigned long size_t;
+#include "crt/device_runtime.h"
+#include "common_functions.h"

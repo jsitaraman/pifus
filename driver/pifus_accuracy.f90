@@ -42,8 +42,8 @@ program pifus_accuracy
   m=n
   call pifus_init()
   call pifus_register_source(bid,x,n)
-  call pifus_register_source_solution(bid,fx)
-  call pifus_register_targets(bid,m,y,fy)
+  call pifus_register_source_solution(bid,nvar,fx)
+  call pifus_register_targets(bid,nvar,m,y,fy)
   call pifus_interpolate(nvar)
   call pifus_delete()
   !

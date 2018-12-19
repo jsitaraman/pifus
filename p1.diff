@@ -1,0 +1,139 @@
+diff --git a/src/searchADTRegion.C b/src/searchADTRegion.C
+index eaf519e..2d21690 100644
+--- a/src/searchADTRegion.C
++++ b/src/searchADTRegion.C
+@@ -1,5 +1,6 @@
+ #include "ADT.h"
+ #include <math.h>
++#define maxStackSize 256
+ extern "C" {
+ int boxRegionIntersect(double *x0,double *vec,double *bbox)
+ {
+@@ -143,8 +144,101 @@ void searchIntersections_region(int *pointIndex,int *adtIntegers,double *adtReal
+   return;
+ }
+ 
++void searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,double *adtReals,
++				double *coord,int level,int node,double *dmin,
++				double *xsearch,double *vec,int nelem,int ndim,int *nchecks)
++{
++  int i,k,is;
++  int d,nodeChild,dimcut;
++  double element[ndim];
++  double dv[ndim/2];
++  bool flag;
++  double dtest,bdist;
++  int nodeStack[maxStackSize];
++  int mm=0;
++  int nstack=1;
++  int stackoffset=0;
++
++  //typedef struct nodestack{
++  //  int val;
++  //  struct nodestack* next;
++  //} nstack;  
++  //
++  nodeStack[0]=node;
++  
++  while(nstack > 0) 
++    {
++      mm=0;
++      for(is=0;is<nstack;is++)
++	{
++	  node=nodeStack[is];
++	  for(i=0;i<ndim;i++)
++	    element[i]=coord[ndim*(adtIntegers[4*node])+i];
++	  //
++	  for(k=0;k<3;k++) 
++	    dv[k]=(element[0]-xsearch[0])*vec[3*k]+
++	      (element[1]-xsearch[1])*vec[3*k+1]+
++	      (element[2]-xsearch[2])*vec[3*k+2];
++	  //
++	  if (dv[0] > 0 && dv[1] > 0 && dv[2] > 0) 
++	    {
++	      (*nchecks)++;
++	      dtest=(element[0]-xsearch[0])*(element[0]-xsearch[0])+
++		(element[1]-xsearch[1])*(element[1]-xsearch[1])+
++		(element[2]-xsearch[2])*(element[2]-xsearch[2]);
++	      if (dtest < dmin[0]) 
++		{
++		  pointIndex[1]=pointIndex[0];
++		  dmin[1]=dmin[0];
++		  pointIndex[0]=adtIntegers[4*node];
++		  dmin[0]=dtest;
++		}
++	      else if (dtest < dmin[1])
++		{
++		  pointIndex[1]=adtIntegers[4*node];
++		  dmin[1]=dtest;
++		}
++	      //TRACEI(nchecks);
++	    }
++	  
++	  //
++	  // check the left and right children
++	  // now and sort based on distance if it is
++	  // within the given octant
++	  //
++	  for(d=1;d<3;d++)
++	    {
++	      nodeChild=adtIntegers[4*node+d];
++	      if (nodeChild > -1) {
++		nodeChild=adtIntegers[4*nodeChild+3];
++		for(i=0;i<ndim;i++)
++		  {
++		    element[i]=adtReals[ndim*nodeChild+i];
++		  }
++		if (boxRegionIntersect(xsearch,vec,element))
++		  {
++		    bdist=boxdist2(xsearch,element);
++		    if (bdist < dmin[0] || bdist < dmin[1]) 
++		      {
++			nodeStack[mm+nstack]=nodeChild;
++			mm++;
++		      }
++		  }
++	      }
++	    }
++	}
++      //printf("mm=%d\n",mm);
++      for(int j=0;j<mm;j++)
++         nodeStack[j]=nodeStack[j+nstack];
++      nstack=mm;
++      level++;
++    }
++  return;
+ }
+ 
++}
++
++
+ void ADT::searchADTRegion(int *pointIndex,double *xsearch,double *vec)
+ {
+   int i;
+@@ -152,6 +246,7 @@ void ADT::searchADTRegion(int *pointIndex,double *xsearch,double *vec)
+   int rootNode;
+   double dmin[2];
+   int nchecks=0;
++  int recursive=1;
+   //
+   // check if the given point is in the bounds of
+   // the ADT
+@@ -163,8 +258,16 @@ void ADT::searchADTRegion(int *pointIndex,double *xsearch,double *vec)
+   // call recursive routine to find the closest
+   // node within an octant
+   //
++  if (recursive) {
+   searchIntersections_region(pointIndex,adtIntegers,adtReals,
++    coord,0,rootNode,dmin,xsearch,vec,nelem,ndim,
++                             &nchecks);
++  }
++  else
++  {
++  searchIntersections_region_norecursion(pointIndex,adtIntegers,adtReals,
+ 			     coord,0,rootNode,dmin,xsearch,vec,nelem,ndim,
+                              &nchecks);
+-  //printf("%d\n",nchecks);
++  }
++  //printf("pointIndex, nchecks=%d %d\n",*pointIndex,nchecks);
+ } 

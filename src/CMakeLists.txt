@@ -13,6 +13,9 @@ set(PIFUS_SOURCES
   pifus.C
   searchADTRegion.C
   pifusInterface.C
+  # CUDA sources
+  dMeshBlock.cu
+  dADT.cu
   )
 
 file(GLOB PIFUS_HEADERS *.h)
