@@ -11,6 +11,10 @@ extern "C" {
   {
     pf=new pifus[1];
   }
+  void pifus_use_timer_(void)
+  {
+   pf->use_timer=1;
+  }
   void pifus_register_source_(int *btag,double *x,int *nnodes)
   {
     pf->registerGridData(*btag,*nnodes,x);

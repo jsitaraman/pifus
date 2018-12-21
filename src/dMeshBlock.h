@@ -35,8 +35,11 @@ class dMeshBlock
     pcount=NULL;
     pindx=NULL;
   }
+#ifdef GPU
   ~dMeshBlock();
-
+#else
+  ~dMeshBlock() {};
+#endif
      
   void setData(int btag_in,int nnodes_in,double *xin);
   

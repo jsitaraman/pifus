@@ -13,13 +13,18 @@ set(PIFUS_SOURCES
   pifus.C
   searchADTRegion.C
   pifusInterface.C
+  #
+  # CUDA emu sources
   #dMeshBlock.C
   #dADT.C
-  # CUDA sources
-  dMeshBlock.cu
-  dADT.cu
   )
-
+if (BUILD_GPU_CODE) 
+  set (PIFUS_SOURCES ${PIFUS_SOURCES} 
+       # CUDA sources
+       dMeshBlock.cu
+       dADT.cu
+      )
+endif()
 file(GLOB PIFUS_HEADERS *.h)
 
 add_library(pifus ${PIFUS_SOURCES})

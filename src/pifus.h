@@ -17,6 +17,7 @@ class pifus
       std::map<int, int> tag_iblk_map;
       std::vector<int> mtags;
   public:
+      int use_timer;
       pifus()
 	{
 	  nblocks=0;
@@ -24,6 +25,7 @@ class pifus
 	  dmblocks.clear();
 	  tag_iblk_map.clear();
 	  mtags.clear();
+          use_timer=0;
 	}
       ~pifus() { mtags.clear(); tag_iblk_map.clear();mblocks.clear();}
 
@@ -33,6 +35,7 @@ class pifus
 			   double *targetq);
       void searchAndInterpolate(int nvar);
       void searchAndInterpolate_gpu(int nvar);
+      void myTimer(char const *, int);
   };
 }
 #endif 

@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(PIFUS CXX C Fortran CUDA)
 
-option(BUILD_SHARED_LIBS "Build shared libraries (default: off)" on)
-option(BUILD_PIFUS_EXE "Build pifus driver code (default: off)" on)
+option(BUILD_SHARED_LIBS "Build shared libraries (default: on)" on)
+option(BUILD_PIFUS_EXE "Build pifus driver code (default: on)" on)
+option(BUILD_GPU_CODE "Build GPU code (default: on)" on)
+if (BUILD_GPU_CODE)
+ project(PIFUS CXX C Fortran CUDA)
+ find_package(CUDA REQUIRED)
+else()
+ project(PIFUS CXX C Fortran)
+endif()
 
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
-
-find_package(CUDA REQUIRED)
-
 
 # Ensure C++11 standard is enabled
 if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -18,8 +21,12 @@ else()
   set(CMAKE_CXX_STANDARD 11)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_EXTENSIONS FALSE)
-  set(CMAKE_CXX_FLAGS "-fopenmp -O3" ${CMAKE_CXX_FLAGS})
-  set(CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS} "-arch=sm_60 -rdc=true")
+  if (BUILD_GPU_CODE) 
+    set(CMAKE_CXX_FLAGS "-DGPU -fopenmp -O3" ${CMAKE_CXX_FLAGS} )
+    set(CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS} "-DGPU -arch=sm_60 -rdc=true")
+  else()
+    set(CMAKE_CXX_FLAGS "-fopenmp -O3" ${CMAKE_CXX_FLAGS})
+  endif()
 endif()
 
 

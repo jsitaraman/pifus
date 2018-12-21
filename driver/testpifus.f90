@@ -46,13 +46,14 @@ program testpifus
  nvar=1
  m=n
  call pifus_init()
+ call pifus_use_timer()
  call pifus_register_source(bid,x,n)
  call pifus_register_source_solution(bid,nvar,fx)
  call pifus_register_targets(bid,nvar,m,y,fy)
  call cpu_time(t1)
  call pifus_interpolate(nvar,device)
  call cpu_time(t2)
- write(6,*) 'Total time = ',t2-t1
+ !write(6,*) 'Total time = ',t2-t1
  call pifus_delete()
  !
  error=0;
