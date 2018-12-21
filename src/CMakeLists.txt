@@ -18,8 +18,9 @@ set(PIFUS_SOURCES
   #dMeshBlock.C
   #dADT.C
   )
-if (BUILD_GPU_CODE) 
-  set (PIFUS_SOURCES ${PIFUS_SOURCES} 
+
+if (BUILD_GPU_CODE)
+  set (PIFUS_SOURCES ${PIFUS_SOURCES}
        # CUDA sources
        dMeshBlock.cu
        dADT.cu
@@ -29,6 +30,11 @@ file(GLOB PIFUS_HEADERS *.h)
 
 add_library(pifus ${PIFUS_SOURCES})
 target_link_libraries(pifus ${MPI_LIBRARIES} ${CMAKE_DL_LIBS})
+
+if (ENABLE_GPU_CODE)
+  set_target_properties(pifus PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON)
+endif()
 
 if(MPI_COMPILE_FLAGS)
   set_target_properties(pifus PROPERTIES
