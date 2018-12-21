@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 #include "pifus.h"
 using namespace PIFUS;
 #define MAXBLOCKS 100;
@@ -22,9 +23,17 @@ extern "C" {
   {
     pf->registerTargets(*btag,*nvar,*ntargets,x,q);
   }
-  void pifus_interpolate_(int *nvar)
+  void pifus_interpolate_(int *nvar, char *devicetype)
   {
-    pf->searchAndInterpolate(*nvar);
+    if (strstr(devicetype,"gpu"))
+      {
+	pf->searchAndInterpolate_gpu(*nvar);
+      }
+    else
+      {
+	pf->searchAndInterpolate(*nvar);
+      }
+	
   }
  void pifus_delete_(void)
   {

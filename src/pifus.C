@@ -39,12 +39,13 @@ void pifus::registerTargets(int btag, int nvar, int ntargets, double *targetxyz,
   auto idxit=tag_iblk_map.find(btag);
   int iblk=idxit->second;
   auto &mb = mblocks[iblk];
-  auto &dmb = mblocks[iblk];
+  auto &dmb = dmblocks[iblk];
+  //TRACEI(ntargets);
   mb->setTargets(nvar,ntargets,targetxyz,targetq);
   dmb->setTargets(nvar,ntargets,targetxyz,targetq);
 }
 
-void pifus::searchAndInterpolate(int nvar)
+void pifus::searchAndInterpolate_gpu(int nvar)
 {
   for (int ib=0;ib<nblocks;ib++)
     {
@@ -52,7 +53,21 @@ void pifus::searchAndInterpolate(int nvar)
       auto &dmb= dmblocks[ib];
       mb->preprocess();
       dmb->preprocess(mb->getADT());
+      //mb->search();
+      dmb->search();
+      //mb->interpolate(nvar);
+      dmb->interpolate(nvar);
+    }
+}
+
+void pifus::searchAndInterpolate(int nvar)
+{
+  for (int ib=0;ib<nblocks;ib++)
+    {
+      auto &mb = mblocks[ib];
+      mb->preprocess();
       mb->search();
       mb->interpolate(nvar);
     }
 }
+

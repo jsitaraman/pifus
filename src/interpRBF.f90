@@ -32,6 +32,9 @@ do i=1,np
 enddo
 M(np+1:np+4,np+1:np+4)=0e0
 B(np+1:np+4)=[1e0,P]
+!do i=1,np+4
+! write(6,"(20(1x,F8.4))") M(i,:)
+!enddo
 !
 call solveMat(M,B,iflag,neqns)
 weights(1:np)=B(1:np)

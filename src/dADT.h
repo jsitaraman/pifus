@@ -9,12 +9,11 @@
 #include <stdlib.h>
 class dADT
 {
-  private :
   
+ public :
+
   int ndim;          /** < number of dimensions (usually 3 but can be more) */
   int nelem;         /** < number of elements */
-
- public :
 
   int *adtIntegers;  /** < integers that define the architecture of the tree */
   double *adtReals;  /** < real numbers that provide the extents of each box */

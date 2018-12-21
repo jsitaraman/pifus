@@ -27,11 +27,13 @@ int boxRegionIntersect(double *x0,double *vec,double *bbox)
 	      xcmin[d]=(xc[d][m] < xcmin[d])?xc[d][m]:xcmin[d];
 	      xcmax[d]=(xc[d][m] > xcmax[d])?xc[d][m]:xcmax[d];
 	    }
+          //printf("%f %f %f\n",xc[0][m],xc[1][m],xc[2][m]);
 	  if (xc[0][m] > -EPS && 
 	      xc[1][m] > -EPS &&
 	      xc[2][m] > -EPS)
 	    {
 	      bflag=1;
+              //printf("A\n");
 	      return bflag;
 	    }
 	}
@@ -54,6 +56,7 @@ int boxRegionIntersect(double *x0,double *vec,double *bbox)
                    (xp[k2] - (bbox[k2]+EPS))*(xp[k2]-(bbox[3+k2]-EPS)) <= 0.0)
 		{
 		  bflag=1;
+                  //printf("B\n");
 		  return bflag;
 		}
 	    }
@@ -215,6 +218,7 @@ void searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,dou
 		  {
 		    element[i]=adtReals[ndim*nodeChild+i];
 		  }
+                //printf("nodeChild/boxRegionIntersect=%d %d\n",nodeChild,boxRegionIntersect(xsearch,vec,element));
 		if (boxRegionIntersect(xsearch,vec,element))
 		  {
 		    bdist=boxdist2(xsearch,element);
@@ -246,7 +250,7 @@ void ADT::searchADTRegion(int *pointIndex,double *xsearch,double *vec)
   int rootNode;
   double dmin[2];
   int nchecks=0;
-  int recursive=1;
+  int recursive=0;
   //
   // check if the given point is in the bounds of
   // the ADT
@@ -254,6 +258,12 @@ void ADT::searchADTRegion(int *pointIndex,double *xsearch,double *vec)
   rootNode=0;
   pointIndex[0]=pointIndex[1]=-1; // closest two points
   dmin[0]=dmin[1]=PIFUS_BIGVALUE;
+  /*
+  printf("%f %f %f\n",xsearch[0],xsearch[1],xsearch[2]);
+  for(int j=0;j < 10; j++)
+   printf("%d \n",adtIntegers[j]);
+  */
+
   //
   // call recursive routine to find the closest
   // node within an octant

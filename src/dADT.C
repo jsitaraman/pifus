@@ -1,6 +1,6 @@
 #include<cuda.h>
 #include "dADT.h"
-#include "cuda_macros.h"
+#include "cuda_emu_macros.h"
 
 void dADT::setHostTree(int nelemInput,int *adtIntegersInput, double *adtRealsInput,
                             double *adtExtentsInput, double *coordInput)

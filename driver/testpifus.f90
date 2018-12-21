@@ -4,13 +4,13 @@ program testpifus
  real*8, allocatable :: y(:,:)
  real*8, allocatable :: fx(:),fy(:)
  integer :: n,itype,bid,nvar,m
- character*10 :: nstr,itypestr
+ character*10 :: nstr,itypestr,device
  real*8 :: error
- real*8 :: myfunc
+ real*8 :: myfunc,t1,t2
  integer :: i
  !
  if (iargc() < 2) then
-    write(6,*) 'Usage : testpifus <npts> <itypestr>'
+    write(6,*) 'Usage : testpifus <npts> <function> <device>'
     stop
  endif
  !
@@ -18,6 +18,15 @@ program testpifus
  read(nstr,*) n
  call getarg(2,itypestr)
  read(itypestr,*) itype
+ if (iargc()==3) then
+  call getarg(3,device)
+  if (index(device,'cpu')==0 .and. index(device,'gpu')==0) then
+     write(6,*) 'Unknown device :',device
+     stop
+  endif
+ else
+  device='cpu'
+ endif
  !
  allocate(x(3,n),fx(n))
  allocate(y(3,n),fy(n))
@@ -40,7 +49,10 @@ program testpifus
  call pifus_register_source(bid,x,n)
  call pifus_register_source_solution(bid,nvar,fx)
  call pifus_register_targets(bid,nvar,m,y,fy)
- call pifus_interpolate(nvar)
+ call cpu_time(t1)
+ call pifus_interpolate(nvar,device)
+ call cpu_time(t2)
+ write(6,*) 'Total time = ',t2-t1
  call pifus_delete()
  !
  error=0;

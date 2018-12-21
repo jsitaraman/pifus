@@ -1,14 +1,14 @@
 #include <cuda.h>
 #include "dMeshBlock.h"
-#include "cuda_macros.h"
+#include "cuda_emu_macros.h"
 #include "device_functions.h"
 
-
-//extern "C" {
-//void searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,double *adtReals,
-//				double *coord,int level,int node,double *dmin,
-//				double *xsearch,double *vec,int nelem,int ndim,int *nchecks);
-//}
+///
+extern "C" {
+void searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,double *adtReals,
+				double *coord,int level,int node,double *dmin,
+				double *xsearch,double *vec,int nelem,int ndim,int *nchecks);
+}
 
 
 __global__ 
@@ -16,12 +16,12 @@ void d_searchADTRegion(int ndim,int nelem,
      double *x, double *xtarget, int *adtIntegers, double *adtReals,double *adtExtents, 
      double *coord,int *pcount, int *pindx, double *weights, int ntargets)
 {
- int idx = blockIdx.x * blockDim.x + threadIdx.x;
+ //int idx = blockIdx.x * blockDim.x + threadIdx.x;
+ //if (idx < ntargets)
+//printf("---- GPU Emulation search --- \n");
 //TRACEI(ntargets);
-//for(int idx=0;idx < ntargets;idx++)
- if (idx < ntargets)
+for(int idx=0;idx < ntargets;idx++)
  {
-  //printf("---- GPU search --- \n");
   double v0[3][3];
   double vec[9];
   double xcloud[24];
@@ -34,12 +34,6 @@ void d_searchADTRegion(int ndim,int nelem,
   v0[0][0]=1.0;v0[1][0]=0.0;;v0[2][0]=0.0;
   v0[0][1]=0.0;v0[1][1]=1.0;;v0[2][1]=0.0;
   v0[0][2]=0.0;v0[1][2]=0.0;;v0[2][2]=1.0;
-  //
-  /*
-  printf("%f %f %f\n",xtarget[3*idx],xtarget[3*idx+1],xtarget[3*idx+2]);
-  for(int j=0;j < 10; j++)
-   printf("%d \n",adtIntegers[j]);
-  */
   //
   for(int l=1;l>=-1;l-=2)
      for(int k=1;k>=-1;k-=2)
@@ -85,9 +79,9 @@ void d_searchADTRegion(int ndim,int nelem,
 __global__
 void d_interpolate(int nvar,int ntargets,double *q,double *qtarget, int *pcount, int *pindx, double *weights)
 {
- int idx = blockIdx.x * blockDim.x + threadIdx.x;
- if (idx < ntargets)	
- // for(int idx=0;idx<ntargets;idx++)
+ //int idx = blockIdx.x * blockDim.x + threadIdx.x;
+ //if (idx < ntargets)	
+  for(int idx=0;idx<ntargets;idx++)
     {
       for(int j=0;j<nvar;j++)
 	{
@@ -149,28 +143,21 @@ void dMeshBlock::search(void)
    deallocateDevice(pindx);
    deallocateDevice(pcount);
  }
- 
  allocateOnDeviceDouble(weights,8*ntargets*sizeof(double));
  allocateOnDeviceInt(pindx,8*ntargets*sizeof(int));
  allocateOnDeviceInt(pcount,ntargets*sizeof(int));
 
- int block_size = 512;
+ int block_size = 64;
  int n_blocks = ntargets/block_size + (ntargets%block_size == 0 ? 0:1);
- d_searchADTRegion<<< n_blocks, block_size >>> 
-                  (dadt->ndim,
-                   dadt->nelem,
-                   x,xtarget,
-                   dadt->adtIntegers,
-		   dadt->adtReals,
-                   dadt->adtExtents,
-                   dadt->coord,
-                   pcount,
-                   pindx,
-                   weights,
-                   ntargets);
-
-
- /*
+ //d_searchADTRegion <<< n_blocks, block_size >>> (x,xtarget,
+ //                                               dadt->adtIntegers,
+ //                                               dadt->adtReals,
+ //                                                dadt->adtExtents,
+ //						 dadt->coord,
+ //                                                pcount,
+ //                                                pindx,
+ //                                                weights,
+ //                                                ntargets);
  d_searchADTRegion(dadt->ndim,
                    dadt->nelem,
                    x,xtarget,
@@ -182,15 +169,11 @@ void dMeshBlock::search(void)
                    pindx,
                    weights,
                    ntargets);
- */
 
 }
 void dMeshBlock::interpolate(int nvar)
 {
- int block_size = 512;
- int n_blocks = ntargets/block_size + (ntargets%block_size == 0 ? 0:1);
- d_interpolate <<< n_blocks, block_size >>> (nvar,ntargets,q,qtarget,pcount,pindx,weights);
- //d_interpolate(nvar,ntargets,q,qtarget,pcount,pindx,weights);
+ d_interpolate(nvar,ntargets,q,qtarget,pcount,pindx,weights);
  //for(int i=0;i<nvar*ntargets;i++) printf("%f ",qH[i]);
  //printf("\n");
  pullFromDevice(qH,qtarget,sizeof(double)*nvar*ntargets);

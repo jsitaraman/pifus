@@ -2,6 +2,7 @@
 #include "pifus_types.h"
 #include <stdio.h>
 #include "MeshBlock.h"
+#include <omp.h>
 #define BASE 0
 extern "C" {
  void interprbf_(double *,double *,double *,int *,int *,int *);
@@ -38,19 +39,19 @@ void MeshBlock::preprocess()
 void MeshBlock::search()
 {
   double v0[3][3];
-  double *vec;
-  double *xcloud;
-  int *indx;
+  //double *vec;
+  //double *xcloud;
+  //int *indx;
   int iorder=1;
   int np;
   //
   v0[0][0]=1.0;v0[1][0]=0.0;;v0[2][0]=0.0;
   v0[0][1]=0.0;v0[1][1]=1.0;;v0[2][1]=0.0;
   v0[0][2]=0.0;v0[1][2]=0.0;;v0[2][2]=1.0;
-  vec=(double *)malloc(sizeof(vec)*9);
+  //vec=(double *)malloc(sizeof(vec)*9);
   np=8*iorder;
-  indx=(int *)malloc(sizeof(int)*(np+1));
-  xcloud=(double *)malloc(sizeof(double)*3*(np+1));
+  //indx=(int *)malloc(sizeof(int)*(np+1));
+  //xcloud=(double *)malloc(sizeof(double)*3*(np+1));
   //
   // free weights if it exists
   //
@@ -69,8 +70,13 @@ void MeshBlock::search()
   pindx=(int **)malloc(sizeof(int *)*ntargets);
   pcount = (int *)malloc(sizeof(int)*ntargets);
   //
+ {
+  #pragma omp parallel for
   for(int i=0;i<ntargets;i++)
     {
+      double vec[9];
+      double xcloud[24];
+      int indx[9];
       int p=0;
       for(int l=1;l>=-1;l-=2)
 	for(int k=1;k>=-1;k-=2)
@@ -89,6 +95,7 @@ void MeshBlock::search()
       int m=0;
       for(p=0;p<np;p++)
 	{
+          //TRACEI(indx[p]);
 	  if (indx[p] > -1) {
 	    xcloud[m++]=x[3*indx[p]];
 	    xcloud[m++]=x[3*indx[p]+1];
@@ -102,11 +109,13 @@ void MeshBlock::search()
       pcount[i]=m/3;
       for(p=0;p<m/3;p++) pindx[i][p]=indx[p]-BASE;      
       interprbf_(xcloud,&(xtarget[3*i]),weights[i],&pcount[i],&itype,&iflag);      
+      //for(p=0;p<pcount[i];p++) TRACED(weights[i][p]);
       //interpls1_(xcloud,&(xtarget[3*i]),weights[i],&pcount[i],&iflag);      
     }
-  PIFUS_FREE(indx);
-  PIFUS_FREE(xcloud);
-  PIFUS_FREE(vec);
+  }
+  //PIFUS_FREE(indx);
+  //PIFUS_FREE(xcloud);
+  //PIFUS_FREE(vec);
 }
   
 void MeshBlock::interpolate(int nvar)

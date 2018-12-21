@@ -32,6 +32,7 @@ class pifus
       void registerTargets(int btag,int nvar,int ntargets, double *targetxyz,
 			   double *targetq);
       void searchAndInterpolate(int nvar);
+      void searchAndInterpolate_gpu(int nvar);
   };
 }
 #endif 

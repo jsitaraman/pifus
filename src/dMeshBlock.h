@@ -15,12 +15,13 @@ class dMeshBlock
   int nvar;
   double *x;
   double *q;
+  double *qH;
   double *xtarget;
   double *qtarget;
-  double **weights;
+  double *weights;
   double *elementBbox;
   int *pcount;
-  int **pindx;
+  int *pindx;
   int btag;
   dADT *dadt;
 

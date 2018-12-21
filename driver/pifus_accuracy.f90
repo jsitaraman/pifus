@@ -4,25 +4,35 @@ program pifus_accuracy
  real*8, allocatable :: y(:,:)
  real*8, allocatable :: fx(:),fy(:)
  integer :: n,itype,bid,nvar,m
- character*10 :: functiontype
+ character*10 :: functiontype,device
  real*8 :: error0,error,dx0,dx,slope
  real*8 :: myfunc
  integer :: i,h
  !
  if (iargc() < 1) then
-    write(6,*) 'Usage : pifus_accuracy <functiontype>'
+    write(6,*) 'Usage : pifus_accuracy <functiontype> <device>'
     stop
  endif
  !
  call getarg(1,functiontype)
+ if (iargc()==2) then
+  call getarg(2,device)
+  if (index(device,'cpu')==0 .and. index(device,'gpu')==0) then
+     write(6,*) 'Unknown device :',device
+     stop
+  endif
+ else
+  device='cpu'
+ endif
  itype=1 
  if (index(functiontype,'linear')       > 0) itype=1
  if (index(functiontype,'quadratic')    > 0) itype=2
  if (index(functiontype,'trig') > 0) itype=3
  write(6,*) 'itype=',itype
  !
+ n=125
  do h=1,5
-   n=1000*(2**(h-1))
+   n=n*8
    allocate(x(3,n),fx(n))
   allocate(y(3,n),fy(n))
   !
@@ -44,7 +54,7 @@ program pifus_accuracy
   call pifus_register_source(bid,x,n)
   call pifus_register_source_solution(bid,nvar,fx)
   call pifus_register_targets(bid,nvar,m,y,fy)
-  call pifus_interpolate(nvar)
+  call pifus_interpolate(nvar,device)
   call pifus_delete()
   !
   dx0=dx
@@ -57,11 +67,11 @@ program pifus_accuracy
   error=error/m
   !
   if (h==1) then
-   write(6,"(A15,1x,A15,1x,A15,1x,A15)") 'dx','error','error-ratio','slope'
-   write(6,"(4(1x,E15.7))") dx,error
+   write(6,"(A10,1x,A15,1x,A15,1x,A15,1x,A15)") 'N','dx','error','error-ratio','slope'
+   write(6,"(1x,I10,4(1x,E15.7))") n,dx,error
   else
    slope=(log(error0)-log(error))/(log(dx0)-log(dx))
-   write(6,"(4(1x,E15.7))") dx,error,error/error0,slope
+   write(6,"(1x,I10,4(1x,E15.7))") n,dx,error,error/error0,slope
   endif
   !
   deallocate(x,y,fx,fy)

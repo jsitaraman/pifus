@@ -13,6 +13,8 @@ set(PIFUS_SOURCES
   pifus.C
   searchADTRegion.C
   pifusInterface.C
+  #dMeshBlock.C
+  #dADT.C
   # CUDA sources
   dMeshBlock.cu
   dADT.cu
