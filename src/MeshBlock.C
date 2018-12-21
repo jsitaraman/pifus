@@ -2,7 +2,11 @@
 #include "pifus_types.h"
 #include <stdio.h>
 #include "MeshBlock.h"
+
+#ifdef ENABLE_OPENMP
 #include <omp.h>
+#endif
+
 #define BASE 0
 extern "C" {
  void interprbf_(double *,double *,double *,int *,int *,int *);
