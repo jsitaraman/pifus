@@ -168,6 +168,7 @@ void dMeshBlock::search(void)
                    pindx,
                    weights,
                    ntargets);
+  cudaThreadSynchronize();
 
 
  /*

@@ -35,15 +35,15 @@ else()
 endif()
 
 if (OPENMP_FOUND)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "-O3 ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_C_FLAGS "-O3 ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
   add_definitions(-DENABLE_OPENMP)
 endif()
 
 # Set some default compilation settings for Fortran compiler
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
-  set(CMAKE_Fortran_FLAGS "-fdefault-real-8 -ffree-line-length-none")
+  set(CMAKE_Fortran_FLAGS "-O3 -fdefault-real-8 -ffree-line-length-none ${CMAKE_Fortran_FLAGS}")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -double_size 128")
 endif()
