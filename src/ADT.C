@@ -1,17 +1,14 @@
 /**
  * Build an alternating digital tree 
  */
+#include "ADT.h"
+#include "pifus_ext.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "ADT.h"
-extern "C"{
-void buildADTrecursion(double *coord,double *adtReals,double *adtWork,int *adtIntegers,
-		       int *elementsAvailable,int *adtCount,int side,int parent,
-		       int level,int ndim,int nelem, int nav);
 
-}
+namespace PIFUS {
 
-extern void median_(int *,double *,int *,double *);
 void ADT::buildADT(int d, int nelements,double *elementBbox)
 {
   int i,i2,j6,j,i4;
@@ -20,7 +17,6 @@ void ADT::buildADT(int d, int nelements,double *elementBbox)
   int adtCount,parent,level,nav;
   int side;    
   double tolerance,delta;
-  FILE *fp,*fp1;
   //
   /* set dimensions and number of elements */
   //
@@ -96,21 +92,29 @@ void ADT::buildADT(int d, int nelements,double *elementBbox)
   //
   // create Inverse map
   //
-  //fp=fopen("adtReals.dat","w");
-  //fp1=fopen("adtInts.dat","w");
   for(i=0;i<nelem;i++)
     {
       i4=4*adtIntegers[4*i];
       adtIntegers[i4+3]=i;
     }
-  //for(i=0;i<nelem;i++)
-  // {
-  //   fprintf(fp,"%.8e %.8e %.8e %.8e %.8e %.8e\n",adtReals[6*i],adtReals[6*i+1],adtReals[6*i+2],adtReals[6*i+3],
-   //                                 adtReals[6*i+4],adtReals[6*i+5]);
-   // fprintf(fp1,"%d %d %d %d\n",adtIntegers[4*i],adtIntegers[4*i+1],adtIntegers[4*i+2],adtIntegers[4*i+3]);
-  // }
-  //fclose(fp);
-  //fclose(fp1);
-  free(elementsAvailable);
-  free(adtWork);
+
+#if 0
+  FILE *fp,*fp1;
+  fp=fopen("adtReals.dat","w");
+  fp1=fopen("adtInts.dat","w");
+  for(i=0;i<nelem;i++) {
+    fprintf(fp,"%.8e %.8e %.8e %.8e %.8e %.8e\n",
+            adtReals[6*i],adtReals[6*i+1],adtReals[6*i+2],adtReals[6*i+3],
+            adtReals[6*i+4],adtReals[6*i+5]);
+   fprintf(fp1,"%d %d %d %d\n",
+           adtIntegers[4*i],adtIntegers[4*i+1],adtIntegers[4*i+2],adtIntegers[4*i+3]);
+  }
+  fclose(fp);
+  fclose(fp1);
+#endif
+
+    free(elementsAvailable);
+    free(adtWork);
 }
+
+} // namespace PIFUS

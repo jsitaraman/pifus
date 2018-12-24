@@ -1,7 +1,17 @@
-#include "pifus_types.h"
+
 #include "pifus.h"
+#include "pifus_types.h"
+#include "MeshBlock.h"
+#include "dMeshBlock.h"
 #include <time.h>
-using namespace PIFUS;
+
+namespace PIFUS {
+
+pifus::pifus()
+{}
+
+pifus::~pifus()
+{}
 
 void pifus::registerGridData(int btag, int nnodes, double *xyz)
 {
@@ -99,21 +109,24 @@ void pifus::searchAndInterpolate(int nvar)
     }
 }
 
-void pifus::myTimer(char const *info,int type)
+void
+pifus::myTimer(char const* info, int type)
 {
-if (use_timer) {
-  static clock_t t_start;
-  clock_t t_end;
+  if (use_timer) {
+    static clock_t t_start;
+    clock_t t_end;
 
-  if (type==0) {
-    t_start=clock();
-    printf("Begin %s\n",info);
-  }
-  if (type==1) {
-   t_end=clock();
-   printf("End %s, time taken=%lf\n",info,((double)(t_end-t_start))/CLOCKS_PER_SEC);
+    if (type == 0) {
+      t_start = clock();
+      printf("Begin %s\n", info);
+    }
+    if (type == 1) {
+      t_end = clock();
+      printf(
+        "End %s, time taken=%lf\n", info,
+        ((double)(t_end - t_start)) / CLOCKS_PER_SEC);
+    }
   }
 }
-}
 
-
+} // namespace PIFUS

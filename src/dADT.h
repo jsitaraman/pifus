@@ -5,29 +5,33 @@
 #ifndef dADT_H
 #define dADT_H
 
-#include "pifus_types.h"
-#include <stdlib.h>
+namespace PIFUS {
+
 class dADT
 {
-  
- public :
+public:
+  int ndim{6};                 /**< number of dimensions (usually 3 but can be more) */
+  int nelem{0};                /**< number of elements */
 
-  int ndim;          /** < number of dimensions (usually 3 but can be more) */
-  int nelem;         /** < number of elements */
+  int* adtIntegers{nullptr};   /**< integers that define the architecture of the tree */
+  double* adtReals{nullptr};   /**< real numbers that provide the extents of each box */
+  double* adtExtents{nullptr}; /**< global extents */
+  double* coord{nullptr};      /**< bounding box of each element */
 
-  int *adtIntegers;  /** < integers that define the architecture of the tree */
-  double *adtReals;  /** < real numbers that provide the extents of each box */
-  double *adtExtents; /** < global extents */
-  double *coord;      /** < bounding box of each element */
+  dADT(){};
 
-  
-  dADT() {ndim=6;nelem=0;adtIntegers=NULL;adtReals=NULL;adtExtents=NULL;coord=NULL;};
   ~dADT() { clearData(); };
-  void setHostTree(int nelem,int *adtIntegersInput,
-                   double *adtRealsInput,double *adtExtentsInput,
-                   double *coordInput);
+  void setHostTree(
+    int nelem,
+    int* adtIntegersInput,
+    double* adtRealsInput,
+    double* adtExtentsInput,
+    double* coordInput);
   void clearData(void);
-  //void buildADT(int d,int nelements,double *elementBbox);  
-  //void searchADTRegion(int *elemid,double *xsearch,double *vec);
+  // void buildADT(int d,int nelements,double *elementBbox);
+  // void searchADTRegion(int *elemid,double *xsearch,double *vec);
 };
+
+} // namespace PIFUS
+
 #endif

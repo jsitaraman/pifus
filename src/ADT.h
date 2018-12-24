@@ -7,6 +7,9 @@
 
 #include "pifus_types.h"
 #include <stdlib.h>
+
+namespace PIFUS {
+
 class ADT
 {
   private :
@@ -46,4 +49,6 @@ class ADT
   void buildADT(int d,int nelements,double *elementBbox);  
   void searchADTRegion(int *elemid,double *xsearch,double *vec);
 };
+
+} // namespace PIFUS
 #endif

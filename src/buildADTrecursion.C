@@ -1,5 +1,5 @@
 #include "pifus_types.h"
-extern void median_(int *,double *,int *,double *);
+#include "pifus_ext.h"
 
 void buildADTrecursion(double *coord,double *adtReals,double *adtWork,int *adtIntegers,
 		       int *elementsAvailable,int *adtCount,int side,int parent,

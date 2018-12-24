@@ -1,7 +1,9 @@
 #include "ADT.h"
 #include <math.h>
 #define maxStackSize 256
-extern "C" {
+
+namespace PIFUS {
+
 int boxRegionIntersect(double *x0,double *vec,double *bbox)
 {
   int i,j,k,l,d,m,k1,k2;
@@ -84,10 +86,9 @@ void searchIntersections_region(int *pointIndex,int *adtIntegers,double *adtReal
 				double *xsearch,double *vec,int nelem,int ndim,int *nchecks)
 {
   int i,k;
-  int d,nodeChild,dimcut;
+  int d,nodeChild;
   double element[ndim];
   double dv[ndim/2];
-  bool flag;
   double dtest,bdist;
   //
   for(i=0;i<ndim;i++)
@@ -152,15 +153,13 @@ void searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,dou
 				double *xsearch,double *vec,int nelem,int ndim,int *nchecks)
 {
   int i,k,is;
-  int d,nodeChild,dimcut;
+  int d,nodeChild;
   double element[ndim];
   double dv[ndim/2];
-  bool flag;
   double dtest,bdist;
   int nodeStack[maxStackSize];
   int mm=0;
   int nstack=1;
-  int stackoffset=0;
 
   //typedef struct nodestack{
   //  int val;
@@ -240,13 +239,8 @@ void searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,dou
   return;
 }
 
-}
-
-
 void ADT::searchADTRegion(int *pointIndex,double *xsearch,double *vec)
 {
-  int i;
-  int flag;
   int rootNode;
   double dmin[2];
   int nchecks=0;
@@ -281,3 +275,5 @@ void ADT::searchADTRegion(int *pointIndex,double *xsearch,double *vec)
   }
   //printf("pointIndex, nchecks=%d %d\n",*pointIndex,nchecks);
 } 
+
+}
