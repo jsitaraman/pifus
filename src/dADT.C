@@ -1,6 +1,9 @@
-#include<cuda.h>
+
 #include "dADT.h"
-#include "cuda_emu_macros.h"
+#include "pifus_types.h"
+#include "pifus_cuda.h"
+
+namespace PIFUS {
 
 void dADT::setHostTree(int nelemInput,int *adtIntegersInput, double *adtRealsInput,
                             double *adtExtentsInput, double *coordInput)
@@ -43,7 +46,9 @@ void dADT::clearData(void)
  if (adtReals) deallocateDevice(adtReals);
  if (adtExtents) deallocateDevice(adtExtents);
  if (coord) deallocateDevice(coord);
- adtIntegers=NULL;
- adtReals=NULL;
- adtExtents=NULL;
+ adtIntegers=nullptr;
+ adtReals=nullptr;
+ adtExtents=nullptr;
 }
+
+} // namespace PIFUS

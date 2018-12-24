@@ -1,17 +1,12 @@
-#include <cuda.h>
 #include "dMeshBlock.h"
-#include "cuda_macros.h"
+#include "dADT.h"
+#include "ADT.h"
+
+#include "pifus_types.h"
+#include "pifus_cuda.h"
 #include "device_functions.h"
 
-
-//extern "C" {
-//void searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,double *adtReals,
-//				double *coord,int level,int node,double *dmin,
-//				double *xsearch,double *vec,int nelem,int ndim,int *nchecks);
-//}
-
-
-__global__ 
+__global__
 void d_searchADTRegion(int ndim,int nelem,
      double *x, double *xtarget, int *adtIntegers, double *adtReals,double *adtExtents, 
      double *coord,int *pcount, int *pindx, double *weights, int ntargets)
@@ -100,6 +95,8 @@ void d_interpolate(int nvar,int ntargets,double *q,double *qtarget, int *pcount,
 	}
     }
 }
+
+namespace PIFUS {
 
 void dMeshBlock::setData(int btag_in,int nnodes_in,double *xin)
 {
@@ -229,3 +226,5 @@ dMeshBlock::~dMeshBlock() {
    }
    delete [] dadt;
 }
+
+} // namespace PIFUS

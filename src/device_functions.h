@@ -1,7 +1,11 @@
+
+#include <cmath>
+
 #define NEQNS 12
 #define maxStackSize 256
-#define d_fabs(a) (a > 0 ? a:-a) 
-//#include <math.h>
+#define d_fabs(a) (a > 0 ? a:-a)
+
+
 __device__
 int d_boxRegionIntersect(double *x0,double *vec,double *bbox)
 {
@@ -153,13 +157,13 @@ void d_interprbf(double *xcloud, double *P,double *weights,int np,int itype, int
 	{
 	  dd=0;
 	  for(n=0;n<3;n++) dd+=(xcloud[3*i+n]-xcloud[3*j+n])*(xcloud[3*i+n]-xcloud[3*j+n]);
-	  M[i][j]=exp(-dd);
+	  M[i][j]=std::exp(-dd);
 	}
       M[i][np]=M[np][i]=1.0;
       for(j=np+1,n=0;j<np+4;j++,n++) M[i][j]=M[j][i]=xcloud[3*i+n];
       dd=0;
       for(n=0;n<3;n++) dd+=(xcloud[3*i+n]-P[n])*(xcloud[3*i+n]-P[n]);
-      B[i]=exp(-dd);
+      B[i]=std::exp(-dd);
     }
   for(i=np;i<np+4;i++) 
     {

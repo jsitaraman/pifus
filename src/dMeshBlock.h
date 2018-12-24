@@ -1,57 +1,46 @@
 #ifndef DMESHBLOCK_H
 #define DMESHBLOCK_H
-#include <vector>
-#include <stdint.h>
-#include <assert.h>
-#include <stdlib.h>
-#include "pifus_types.h"
-#include "dADT.h"
-#include "ADT.h"
+
+namespace PIFUS {
+
+class dADT;
+class ADT;
+
 class dMeshBlock
 {
- public:
-  int nnodes;
-  int ntargets;
-  int nvar;
-  double *x;
-  double *q;
-  double *qH;
-  double *xtarget;
-  double *qtarget;
-  double *weights;
-  double *elementBbox;
-  int *pcount;
-  int *pindx;
-  int btag;
-  dADT *dadt;
+public:
+  int nnodes{0};
+  int ntargets{0};
+  int nvar{5};
+  double* x{nullptr};
+  double* q{nullptr};
+  double* qH{nullptr};
+  double* xtarget{nullptr};
+  double* qtarget{nullptr};
+  double* weights{nullptr};
+  double* elementBbox{nullptr};
+  int* pcount{nullptr};
+  int* pindx{nullptr};
+  int btag{0};
+  dADT* dadt{0};
 
-  dMeshBlock() {
-    nnodes=ntargets=0;nvar=5;x=NULL;xtarget=NULL;
-    btag=0;dadt=NULL;
-    q=NULL;
-    qtarget=NULL;
-    weights=NULL;
-    elementBbox=NULL;
-    pcount=NULL;
-    pindx=NULL;
-  }
-#ifdef GPU
+  dMeshBlock() {}
+
   ~dMeshBlock();
-#else
-  ~dMeshBlock() {};
-#endif
-     
-  void setData(int btag_in,int nnodes_in,double *xin);
-  
-  void setQ(int nvar,double *qin);
 
-  void setTargets(int nvar,int ntargets_in,double *xtargets_in,double *qtargets_in);
+  void setData(int btag_in, int nnodes_in, double* xin);
 
-  void preprocess(ADT *adt);
+  void setQ(int nvar, double* qin);
+
+  void setTargets(int nvar, int ntargets_in, double* xtargets_in, double* qtargets_in);
+
+  void preprocess(ADT* adt);
 
   void search();
 
   void interpolate(int nvar);
 };
+
+} // namespace PIFUS
 
 #endif 
