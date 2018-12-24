@@ -3,7 +3,8 @@
 #include "pifus_types.h"
 #include "MeshBlock.h"
 #include "dMeshBlock.h"
-#include <time.h>
+
+#include <chrono>
 
 namespace PIFUS {
 
@@ -112,19 +113,20 @@ void pifus::searchAndInterpolate(int nvar)
 void
 pifus::myTimer(char const* info, int type)
 {
+  using namespace std::chrono;
+
   if (use_timer) {
-    static clock_t t_start;
-    clock_t t_end;
+    static system_clock::time_point  t_start;
+    system_clock::time_point t_end;
 
     if (type == 0) {
-      t_start = clock();
+      t_start = system_clock::now();
       printf("Begin %s\n", info);
     }
     if (type == 1) {
-      t_end = clock();
-      printf(
-        "End %s, time taken=%lf\n", info,
-        ((double)(t_end - t_start)) / CLOCKS_PER_SEC);
+      t_end = system_clock::now();
+      auto deltat = duration_cast<duration<double>>(t_end - t_start);
+      printf( "End %s, time taken=%lf\n", info, deltat.count());
     }
   }
 }
