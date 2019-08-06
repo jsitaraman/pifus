@@ -146,20 +146,25 @@ void d_interprbf(double *xcloud, double *P,double *weights,int np,int itype, int
   double M[NEQNS][NEQNS], B[NEQNS];
   double dd;
   int neqns=np+4;
+  double dmax,efac;
   //TRACEI(np);
+  dmax=0.0;
   for(i=0;i<np;i++)
     {
       for(j=0;j<np;j++)
 	{
 	  dd=0;
 	  for(n=0;n<3;n++) dd+=(xcloud[3*i+n]-xcloud[3*j+n])*(xcloud[3*i+n]-xcloud[3*j+n]);
-	  M[i][j]=exp(-dd);
+          dmax=PIFUS_MAX(dmax,dd);
+	  M[i][j]=dd;
 	}
+      for(j=0;j<np;j++) {M[i][j]=exp(-M[i][j]/dmax);}
+        
       M[i][np]=M[np][i]=1.0;
       for(j=np+1,n=0;j<np+4;j++,n++) M[i][j]=M[j][i]=xcloud[3*i+n];
       dd=0;
       for(n=0;n<3;n++) dd+=(xcloud[3*i+n]-P[n])*(xcloud[3*i+n]-P[n]);
-      B[i]=exp(-dd);
+      B[i]=exp(-dd/dmax);
     }
   for(i=np;i<np+4;i++) 
     {
@@ -178,6 +183,49 @@ void d_interprbf(double *xcloud, double *P,double *weights,int np,int itype, int
   d_solvec(M,B,iflag,neqns);
   for(i=0;i<np;i++) weights[i]=B[i];
 }
+
+__device__ 
+void d_interpkrig(double *xcloud, double *P,double *weights,int np,int itype, int *iflag)
+{
+  int i,j,n;
+  double M[NEQNS][NEQNS], B[NEQNS];
+  double dd;
+  int neqns=np+1;
+  double dmean;
+  //TRACEI(np);
+  dmean=0;
+  for(i=0;i<np;i++)
+    {
+      for(j=0;j<np;j++)
+	{
+	  dd=0;
+	  for(n=0;n<3;n++) dd+=(xcloud[3*i+n]-xcloud[3*j+n])*(xcloud[3*i+n]-xcloud[3*j+n]);
+          //dmean+=sqrt(dd);
+          dmean=PIFUS_MAX(dmean,sqrt(dd));
+	  M[i][j]=dd;
+	}
+      //dmean/=np;
+      //dmean=1;
+      for(j=0;j<np;j++) M[i][j]=exp(-M[i][j]/dmean/dmean);
+      M[i][np]=M[np][i]=1.0;
+      dd=0;
+      for(n=0;n<3;n++) dd+=(xcloud[3*i+n]-P[n])*(xcloud[3*i+n]-P[n]);
+      B[i]=exp(-dd/dmean/dmean);
+    }
+  M[np][np]=0.0;
+  B[np]=1.0;
+  /*
+  for(i=0;i<np+4;i++)
+   {
+    for(j=0;j<np+4;j++)
+      printf("%8.4f ", M[i][j]);
+    printf("\n");
+   }
+  */
+  d_solvec(M,B,iflag,neqns);
+  for(i=0;i<np;i++) weights[i]=B[i];
+}
+
 
 __device__
 void d_searchIntersections_norecursion(int *pointIndex,

@@ -22,6 +22,10 @@ class MeshBlock
   int **pindx;
   int btag;
   ADT *adt;
+  //
+  int nwbc,nobc,ntypes,nfaces;
+  int *c2f,*face,*iblank,*wbcnode,*obcnode,*nc,*nv;
+  int **vconn;
 
  public:
   MeshBlock() {
@@ -33,6 +37,9 @@ class MeshBlock
     elementBbox=NULL;
     pcount=NULL;
     pindx=NULL;
+    c2f=face=iblank=wbcnode=obcnode=nc=nv=NULL;
+    nwbc=nobc=ntypes=nfaces=0;
+    vconn=NULL;
   }
 
  ~MeshBlock() {
@@ -54,7 +61,30 @@ class MeshBlock
     nnodes=nnodes_in;
     x=xin;
   }
-  
+
+  void setData(int btag_in,int nnodes_in,int *c2f_in,
+	       int *face_in,double *x_in, int *iblank_in,
+	       int nfaces_in,int nwbc_in, int nobc_in,int *wbcnode_in, 
+	       int *obcnode_in, int ntypes_in,
+	       int *nv_in, int *nc_in, int *vconn_in)
+  {
+    btag=btag_in;
+    nnodes=nnodes_in;
+    c2f=c2f_in;
+    nfaces=nfaces_in;
+    face=face_in;
+    x=x_in;
+    iblank=iblank_in;
+    nwbc=nwbc_in;
+    nobc=nobc_in;
+    wbcnode=wbcnode_in;
+    obcnode=obcnode_in;
+    ntypes=ntypes_in;
+    nv=nv_in;
+    nc=nc_in;
+    vconn=vconn_in;
+  }
+
   void setQ(int nvarin,double *qin) {nvar=nvarin;q=qin;};
 
   void setTargets(int nvar,int ntargets_in,double *xtargets_in,double *qtargets_in)

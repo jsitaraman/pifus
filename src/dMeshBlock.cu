@@ -78,6 +78,7 @@ void d_searchADTRegion(int ndim,int nelem,
     pcount[idx]=m/3;
     for(p=0;p<m/3;p++) pindx[8*idx+p]=indx[p];
     d_interprbf(xcloud,&(xtarget[3*idx]),&(weights[8*idx]),pcount[idx],itype,&iflag);
+    //d_interpkrig(xcloud,&(xtarget[3*idx]),&(weights[8*idx]),pcount[idx],itype,&iflag);
     //for(p=0;p<pcount[idx];p++) TRACED(weights[8*idx+p]);
  }
 }
@@ -112,6 +113,10 @@ void dMeshBlock::setData(int btag_in,int nnodes_in,double *xin)
     cudaMemcpy(x,xin,xsize,cudaMemcpyHostToDevice);
     */
 }
+
+
+			 
+
 
 
 void dMeshBlock::setQ(int nvar,double *qin) {

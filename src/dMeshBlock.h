@@ -24,6 +24,10 @@ class dMeshBlock
   int *pindx;
   int btag;
   dADT *dadt;
+  //
+  int nwbc,nobc,n4,n5,n6,n8,nfaces,ncells;
+  int *c2f,*face,*iblank,*wbcnode,*obcnode,*nc,*nv;
+  int *ndc4,*ndc5,*ndc6,*ndc8;
 
   dMeshBlock() {
     nnodes=ntargets=0;nvar=5;x=NULL;xtarget=NULL;
@@ -34,6 +38,10 @@ class dMeshBlock
     elementBbox=NULL;
     pcount=NULL;
     pindx=NULL;
+    c2f=face=iblank=wbcnode=obcnode=nc=nv=NULL;
+    ndc4=ndc5=ndc6=ndc8=NULL;
+    n4=n5=n6=n8=nwbc=nobc=nfaces=0;
+    ncells=0;
   }
 #ifdef GPU
   ~dMeshBlock();
@@ -42,6 +50,12 @@ class dMeshBlock
 #endif
      
   void setData(int btag_in,int nnodes_in,double *xin);
+
+  void setData(int btag_in,int nnodes_in,int *c2f_in,
+	       int *face_in,double *x_in, int *iblank_in,
+	       int nwbc_in, int nobc_in,int *wbcnode_in, 
+	       int *obcnode_in, int ntypes_in,
+	       int *nv_in, int *nc_in, int *vconn_in)
   
   void setQ(int nvar,double *qin);
 

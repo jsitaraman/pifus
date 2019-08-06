@@ -31,7 +31,7 @@ program pifus_accuracy
  write(6,*) 'itype=',itype
  !
  n=125
- do h=1,5
+ do h=1,6
    n=n*8
    allocate(x(3,n),fx(n))
   allocate(y(3,n),fy(n))

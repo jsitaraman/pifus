@@ -35,6 +35,13 @@ class pifus
 			   double *targetq);
       void searchAndInterpolate(int nvar);
       void searchAndInterpolate_gpu(int nvar);
+
+      void registerGridData(int btag, int nnodes, 
+			    int *c2f,int *face,
+			    double *xyz, int *iblank,
+			    int nfaces,int nwbc, int nobc, 
+			    int *wbcnode,int *obcnode,
+			    int ntypes,int *nv, int *nc, int *vconn);
       void myTimer(char const *, int);
   };
 }

@@ -5,6 +5,10 @@ project(PIFUS CXX C Fortran)
 option(BUILD_SHARED_LIBS "Build shared libraries (default: on)" on)
 option(BUILD_PIFUS_EXE "Build pifus driver code (default: on)" on)
 option(BUILD_GPU_CODE "Build GPU code (default: on)" on)
+option(BUILD_GRIDGEN_EXE "Build strand/cart meshing code (default: on)" on)
+
+find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
 
 # CUDA architecture to target
 set(PIFUS_CUDA_SM "60" CACHE STRING "CUDA arch option")
@@ -43,13 +47,17 @@ endif()
 
 # Set some default compilation settings for Fortran compiler
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
-  set(CMAKE_Fortran_FLAGS "-O3 -fdefault-real-8 -ffree-line-length-none ${CMAKE_Fortran_FLAGS}")
+  set(CMAKE_Fortran_FLAGS "-O3 -fbacktrace -fbounds-check -fdefault-real-8 -ffree-line-length-none ${CMAKE_Fortran_FLAGS}")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -double_size 128")
 endif()
 
 # Always build libpifus
 add_subdirectory(src)
+
+if (BUILD_GRIDGEN_EXE)
+  add_subdirectory(gridGen)
+endif()
 
 # Optionally build driver exe and gridGen if the user requests it
 if (BUILD_PIFUS_EXE)

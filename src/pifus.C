@@ -27,6 +27,48 @@ void pifus::registerGridData(int btag, int nnodes, double *xyz)
   dmb->setData(btag,nnodes,xyz);
 #endif
 }
+
+
+void pifus::registerGridData(int btag, int nnodes, 
+			     int *c2f,int *face,
+			     double *xyz, int *iblank,
+			     int nfaces,int nwbc, int nobc, 
+			     int *wbcnode,int *obcnode,
+			     int ntypes,int *nv, int *nc, int *vconn)
+{
+  int iblk;
+  auto idxit=tag_iblk_map.find(btag);
+  if (idxit== tag_iblk_map.end()) {
+    mtags.push_back(btag);
+    mblocks.push_back(std::unique_ptr<MeshBlock>(new MeshBlock));
+#ifdef GPU
+    dmblocks.push_back(std::unique_ptr<dMeshBlock>(new dMeshBlock));
+#endif
+    nblocks=mblocks.size();
+    iblk=nblocks-1;
+    tag_iblk_map[btag]=iblk;
+  } else {
+    iblk=idxit->second;
+  
+  } 
+  auto &mb = mblocks[iblk];
+  mb->setData(btag,nnodes,
+	      c2f,face,
+	      xyz,iblank,
+	      nfaces,nwbc,nobc,
+	      wbcnode,obcnode,
+	      ntypes,nv,nc,vconn);
+#ifdef GPU
+  auto &dmb= dmblocks[iblk];
+  dmb->setData(btag,nnodes,
+	       c2f,face,
+	       xyz,iblank,
+	       nfaces,nwbc,nobc,
+	       wbcnode,obcnode,
+	       ntypes,nv,nc,vconn);
+#endif
+}
+ 
   
 void pifus::registerSolution(int btag, int nvar, double *q)
 {
