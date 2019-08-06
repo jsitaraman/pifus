@@ -1,11 +1,16 @@
 #ifndef MESHBLOCK_H
 #define MESHBLOCK_H
+
+#include "ADT.h"
+#include "pifus_types.h"
+
 #include <vector>
 #include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
-#include "pifus_types.h"
-#include "ADT.h"
+
+namespace PIFUS {
+
 class MeshBlock
 {
  private:
@@ -102,5 +107,7 @@ class MeshBlock
 
   ADT *getADT() {return adt;}
 };
+
+} // namespase PIFUS
 
 #endif 

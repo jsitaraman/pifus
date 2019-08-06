@@ -4,28 +4,28 @@ set(PIFUS_SOURCES
   interpRBF.f90
   solveMat.f90
   interpLS1.f90
-  # C sources
-  buildADTrecursion.c
 
   # CXX sources
+  buildADTrecursion.C
   ADT.C
   MeshBlock.C
   pifus.C
   searchADTRegion.C
   pifusInterface.C
-  #
-  # CUDA emu sources
-  #dMeshBlock.C
-  #dADT.C
   )
 
 if (BUILD_GPU_CODE)
   set (PIFUS_SOURCES ${PIFUS_SOURCES}
        # CUDA sources
-       dMeshBlock2.C
        dMeshBlock.cu
        dADT.cu
       )
+else()
+  set(PIFUS_SOURCES ${PIFUS_SOURCES}
+    dMeshBlock2.C
+    dMeshBlock.C
+    dADT.C
+    )
 endif()
 file(GLOB PIFUS_HEADERS *.h)
 

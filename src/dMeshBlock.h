@@ -1,71 +1,71 @@
 #ifndef DMESHBLOCK_H
 #define DMESHBLOCK_H
-#include <vector>
-#include <stdint.h>
-#include <assert.h>
-#include <stdlib.h>
-#include "pifus_types.h"
-#include "dADT.h"
-#include "ADT.h"
+
+namespace PIFUS {
+
+class dADT;
+class ADT;
+
 class dMeshBlock
 {
- public:
-  int nnodes;
-  int ntargets;
-  int nvar;
-  double *x;
-  double *q;
-  double *qH;
-  double *xtarget;
-  double *qtarget;
-  double *weights;
-  double *elementBbox;
-  int *pcount;
-  int *pindx;
-  int btag;
-  dADT *dadt;
-  //
-  int nwbc,nobc,n4,n5,n6,n8,nfaces,ncells;
-  int *c2f,*face,*iblank,*wbcnode,*obcnode,*nc,*nv;
-  int *ndc4,*ndc5,*ndc6,*ndc8;
+public:
+  int nnodes{0};
+  int ntargets{0};
+  int nvar{5};
+  double* x{nullptr};
+  double* q{nullptr};
+  double* qH{nullptr};
+  double* xtarget{nullptr};
+  double* qtarget{nullptr};
+  double* weights{nullptr};
+  double* elementBbox{nullptr};
+  int* pcount{nullptr};
+  int* pindx{nullptr};
+  int btag{0};
+  dADT* dadt{0};
+  int nwbc{0};
+  int nobc{0};
+  int n4{0};
+  int n5{0};
+  int n6{0};
+  int n8{0};
+  int nfaces{0};
+  int ncells{0};
+  int *c2f{nullptr};
+  int *face{nullptr};
+  int *iblank{nullptr};
+  int *wbcnode{nullptr};
+  int *obcnode{nullptr};
+  int *nc{nullptr};
+  int *nv{nullptr};
+  int *ndc4{nullptr}:
+  int *ndc5{nullptr};
+  int *ndc6{nullptr};
+  int *ndc8{nullptr};
 
-  dMeshBlock() {
-    nnodes=ntargets=0;nvar=5;x=NULL;xtarget=NULL;
-    btag=0;dadt=NULL;
-    q=NULL;
-    qtarget=NULL;
-    weights=NULL;
-    elementBbox=NULL;
-    pcount=NULL;
-    pindx=NULL;
-    c2f=face=iblank=wbcnode=obcnode=nc=nv=NULL;
-    ndc4=ndc5=ndc6=ndc8=NULL;
-    n4=n5=n6=n8=nwbc=nobc=nfaces=0;
-    ncells=0;
-  }
-#ifdef GPU
+  dMeshBlock() {}
+
   ~dMeshBlock();
-#else
-  ~dMeshBlock() {};
-#endif
-     
-  void setData(int btag_in,int nnodes_in,double *xin);
+
+  void setData(int btag_in, int nnodes_in, double* xin);
 
   void setData(int btag_in,int nnodes_in,int *c2f_in,
 	       int *face_in,double *x_in, int *iblank_in,
 	       int nwbc_in, int nobc_in,int *wbcnode_in, 
 	       int *obcnode_in, int ntypes_in,
 	       int *nv_in, int *nc_in, int *vconn_in)
-  
-  void setQ(int nvar,double *qin);
 
-  void setTargets(int nvar,int ntargets_in,double *xtargets_in,double *qtargets_in);
+  void setQ(int nvar, double* qin);
 
-  void preprocess(ADT *adt);
+  void setTargets(int nvar, int ntargets_in, double* xtargets_in, double* qtargets_in);
+
+  void preprocess(ADT* adt);
 
   void search();
 
   void interpolate(int nvar);
 };
+
+} // namespace PIFUS
 
 #endif 

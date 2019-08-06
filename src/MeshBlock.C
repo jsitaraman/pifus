@@ -1,17 +1,18 @@
-#include <stdio.h>
-#include "pifus_types.h"
-#include <stdio.h>
+
 #include "MeshBlock.h"
+#include "pifus_types.h"
+#include "pifus_ext.h"
+
+#include <stdio.h>
 
 #ifdef ENABLE_OPENMP
 #include <omp.h>
 #endif
 
-#define BASE 0
-extern "C" {
- void interprbf_(double *,double *,double *,int *,int *,int *);
- void interpls1_(double *,double *,double *,int *,int *);
-}
+#define PIFUS_BASE 0
+
+namespace PIFUS {
+
 void MeshBlock::preprocess()
 {
   if (elementBbox) PIFUS_FREE(elementBbox);
@@ -111,7 +112,7 @@ void MeshBlock::search()
       weights[i]=(double *) malloc(sizeof(double)*m);
       pindx[i]=(int *)malloc(sizeof(int)*m/3);
       pcount[i]=m/3;
-      for(p=0;p<m/3;p++) pindx[i][p]=indx[p]-BASE;      
+      for(p=0;p<m/3;p++) pindx[i][p]=indx[p]-PIFUS_BASE;
       interprbf_(xcloud,&(xtarget[3*i]),weights[i],&pcount[i],&itype,&iflag);      
       //for(p=0;p<pcount[i];p++) TRACED(weights[i][p]);
       //interpls1_(xcloud,&(xtarget[3*i]),weights[i],&pcount[i],&iflag);      
@@ -124,15 +125,14 @@ void MeshBlock::search()
   
 void MeshBlock::interpolate(int nvar)
 {
-  for(int i=0;i<ntargets;i++)
-    {
-      for(int j=0;j<nvar;j++)
-	{
-	  qtarget[i*nvar+j]=0.0;
-	  for(int p=0;p<pcount[i];p++)
-            {
-	    qtarget[i*nvar+j]+=(weights[i][p]*q[pindx[i][p]*nvar+j]);
-            }
-	}
+  for (int i = 0; i < ntargets; i++) {
+    for (int j = 0; j < nvar; j++) {
+      qtarget[i * nvar + j] = 0.0;
+      for (int p = 0; p < pcount[i]; p++) {
+        qtarget[i * nvar + j] += (weights[i][p] * q[pindx[i][p] * nvar + j]);
+      }
     }
+  }
 }
+
+} // namespace PIFUS

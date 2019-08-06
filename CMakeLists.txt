@@ -39,8 +39,8 @@ else()
 endif()
 
 if (OPENMP_FOUND)
-  set(CMAKE_CXX_FLAGS "-O3 ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set(CMAKE_C_FLAGS "-O3 ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
   add_definitions(-DENABLE_OPENMP)
 endif()
@@ -51,6 +51,12 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -r8 -double_size 128")
 endif()
+
+# CMake Configuration variables
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+    "Choose the build type: Debug Release" FORCE)
+endif (NOT CMAKE_BUILD_TYPE)
 
 # Always build libpifus
 add_subdirectory(src)
