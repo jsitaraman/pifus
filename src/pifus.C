@@ -1,6 +1,7 @@
 
 #include "pifus.h"
 #include "pifus_types.h"
+#include "pifus_cuda.h"
 #include "MeshBlock.h"
 #include "dMeshBlock.h"
 
@@ -21,9 +22,9 @@ void pifus::registerGridData(int btag, int nnodes, double *xyz)
   if (idxit== tag_iblk_map.end()) {
     mtags.push_back(btag);
     mblocks.push_back(std::unique_ptr<MeshBlock>(new MeshBlock));
-#ifdef GPU
+    //#ifdef GPU
     dmblocks.push_back(std::unique_ptr<dMeshBlock>(new dMeshBlock));
-#endif
+    //#endif
     nblocks=mblocks.size();
     iblk=nblocks-1;
     tag_iblk_map[btag]=iblk;
@@ -33,10 +34,10 @@ void pifus::registerGridData(int btag, int nnodes, double *xyz)
   } 
   auto &mb = mblocks[iblk];
   mb->setData(btag,nnodes,xyz);
-#ifdef GPU
+  //#ifdef GPU
   auto &dmb= dmblocks[iblk];
   dmb->setData(btag,nnodes,xyz);
-#endif
+  //#endif
 }
 
 
@@ -45,22 +46,21 @@ void pifus::registerGridData(int btag, int nnodes,
 			     double *xyz, int *iblank,
 			     int nfaces,int nwbc, int nobc, 
 			     int *wbcnode,int *obcnode,
-			     int ntypes,int *nv, int *nc, int *vconn)
+			     int ntypes,int *nv, int *nc, int **vconn)
 {
   int iblk;
   auto idxit=tag_iblk_map.find(btag);
   if (idxit== tag_iblk_map.end()) {
     mtags.push_back(btag);
     mblocks.push_back(std::unique_ptr<MeshBlock>(new MeshBlock));
-#ifdef GPU
+    //#ifdef GPU
     dmblocks.push_back(std::unique_ptr<dMeshBlock>(new dMeshBlock));
-#endif
+    //#endif
     nblocks=mblocks.size();
     iblk=nblocks-1;
     tag_iblk_map[btag]=iblk;
   } else {
     iblk=idxit->second;
-  
   } 
   auto &mb = mblocks[iblk];
   mb->setData(btag,nnodes,
@@ -69,7 +69,7 @@ void pifus::registerGridData(int btag, int nnodes,
 	      nfaces,nwbc,nobc,
 	      wbcnode,obcnode,
 	      ntypes,nv,nc,vconn);
-#ifdef GPU
+  //#ifdef GPU
   auto &dmb= dmblocks[iblk];
   dmb->setData(btag,nnodes,
 	       c2f,face,
@@ -77,7 +77,7 @@ void pifus::registerGridData(int btag, int nnodes,
 	       nfaces,nwbc,nobc,
 	       wbcnode,obcnode,
 	       ntypes,nv,nc,vconn);
-#endif
+  //#endif
 }
  
   
@@ -87,10 +87,10 @@ void pifus::registerSolution(int btag, int nvar, double *q)
   int iblk=idxit->second;
   auto &mb = mblocks[iblk];
   mb->setQ(nvar,q);
-#ifdef GPU
+//#ifdef GPU
   auto &dmb= dmblocks[iblk];
   dmb->setQ(nvar,q);
-#endif
+//#endif
 }
 
 void pifus::registerTargets(int btag, int nvar, int ntargets, double *targetxyz,
@@ -101,15 +101,23 @@ void pifus::registerTargets(int btag, int nvar, int ntargets, double *targetxyz,
   auto &mb = mblocks[iblk];
   //TRACEI(ntargets);
   mb->setTargets(nvar,ntargets,targetxyz,targetq);
-#ifdef GPU
+//#ifdef GPU
   auto &dmb = dmblocks[iblk];
   dmb->setTargets(nvar,ntargets,targetxyz,targetq);
-#endif
+//#endif
 }
 
+void pifus::preprocess(void)
+{
+  for(int ib=0;ib<nblocks;ib++)
+    {
+      auto &dmb=dmblocks[ib];
+      dmb->preprocess();
+    }
+}
 void pifus::searchAndInterpolate_gpu(int nvar)
 {
-#ifdef GPU
+//#ifdef GPU
   for (int ib=0;ib<nblocks;ib++)
     {
       auto &mb = mblocks[ib];
@@ -127,12 +135,12 @@ void pifus::searchAndInterpolate_gpu(int nvar)
       dmb->interpolate(nvar);
       myTimer("Interpolate",1);
     }
-#else
-  printf("####  Error ######\n");
-  printf("GPU mode not enabled\n");
-  printf("set BUILD_GPU_CODE to on in CMakelists.txt\n");
-  printf("####  Error ######\n");
-#endif
+//#else
+//  printf("####  Error ######\n");
+//  printf("GPU mode not enabled\n");
+//  printf("set BUILD_GPU_CODE to on in CMakelists.txt\n");
+//  printf("####  Error ######\n");
+//#endif
 }
 
 void pifus::searchAndInterpolate(int nvar)
@@ -151,6 +159,33 @@ void pifus::searchAndInterpolate(int nvar)
       myTimer("Interpolate",1);
     }
 }
+
+void pifus::connect(void)
+{
+  for(int ib=0;ib<nblocks;ib++)
+    {
+      auto &dmb=dmblocks[ib];
+      dmb->createSearchPoints();
+    }
+  //
+  // specific for 2-grid problem on  single
+  // GPU now
+  //
+  for(int ib=0;ib<nblocks;ib++)
+    {
+      auto &dmb=dmblocks[ib];
+      auto &omb=dmblocks[(ib+1)%2];
+      dmb->searchInverseMap(omb->xquery,omb->iblank,omb->fringe,
+			   omb->deltax,omb->scfac,omb->nquery);
+    }
+  for(int ib=0;ib<nblocks;ib++)
+    {
+      auto &dmb=dmblocks[ib];
+      auto &mb=mblocks[ib];
+      pullFromDevice(mb->iblank,dmb->iblank,dmb->ncells*sizeof(int));
+      mb->outputIblankStats();
+    }
+}    
 
 void
 pifus::myTimer(char const* info, int type)

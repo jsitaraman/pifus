@@ -2,8 +2,6 @@
 #define MESHBLOCK_H
 
 #include "ADT.h"
-#include "pifus_types.h"
-
 #include <vector>
 #include <stdint.h>
 #include <assert.h>
@@ -13,7 +11,7 @@ namespace PIFUS {
 
 class MeshBlock
 {
- private:
+ public:
   int nnodes;
   int ntargets;
   int nvar;
@@ -28,11 +26,11 @@ class MeshBlock
   int btag;
   ADT *adt;
   //
-  int nwbc,nobc,ntypes,nfaces;
+  int nwbc,nobc,ntypes,nfaces,ncells;
   int *c2f,*face,*iblank,*wbcnode,*obcnode,*nc,*nv;
   int **vconn;
 
- public:
+
   MeshBlock() {
     nnodes=ntargets=0;nvar=5;x=NULL;xtarget=NULL;
     btag=0;adt=NULL;
@@ -71,7 +69,7 @@ class MeshBlock
 	       int *face_in,double *x_in, int *iblank_in,
 	       int nfaces_in,int nwbc_in, int nobc_in,int *wbcnode_in, 
 	       int *obcnode_in, int ntypes_in,
-	       int *nv_in, int *nc_in, int *vconn_in)
+	       int *nv_in, int *nc_in, int **vconn_in)
   {
     btag=btag_in;
     nnodes=nnodes_in;
@@ -88,6 +86,8 @@ class MeshBlock
     nv=nv_in;
     nc=nc_in;
     vconn=vconn_in;
+    ncells=0;
+    for(int i=0;i<ntypes;i++) ncells+=nc[i];
   }
 
   void setQ(int nvarin,double *qin) {nvar=nvarin;q=qin;};
@@ -106,6 +106,9 @@ class MeshBlock
   void interpolate(int nvar);
 
   ADT *getADT() {return adt;}
+
+  void outputIblankStats(void);
+
 };
 
 } // namespase PIFUS

@@ -38,10 +38,30 @@ public:
   int *obcnode{nullptr};
   int *nc{nullptr};
   int *nv{nullptr};
-  int *ndc4{nullptr}:
+  int *ndc4{nullptr};
   int *ndc5{nullptr};
   int *ndc6{nullptr};
   int *ndc8{nullptr};
+  //
+  // memory created for preprocessing inverse map
+  // has to be explicitly destroyed
+  //
+  int nquery{0};
+  int *neig{nullptr};
+  double *cellvol{nullptr};
+  double *cellcenter{nullptr};
+  double xmin[3],xmax[3];
+  double xwbmin[3],xwbmax[3];
+  double ds[3];
+  int mdim[3];
+  int *itag{nullptr};
+  int *celltag{nullptr};
+  double *scfac{nullptr};
+  int *auxGrid{nullptr};
+  double *xquery{nullptr};
+  int *fringe{nullptr};
+  double *deltax{nullptr};
+  int *interp{nullptr};
 
   dMeshBlock() {}
 
@@ -49,11 +69,17 @@ public:
 
   void setData(int btag_in, int nnodes_in, double* xin);
 
-  void setData(int btag_in,int nnodes_in,int *c2f_in,
-	       int *face_in,double *x_in, int *iblank_in,
-	       int nwbc_in, int nobc_in,int *wbcnode_in, 
-	       int *obcnode_in, int ntypes_in,
-	       int *nv_in, int *nc_in, int *vconn_in)
+  void setData(int btag_in,int nnodes_in,
+	       int *c2f_in,int *face_in,
+	       double *x_in, int *iblank_in,
+	       int nfaces_in,int nwbc_in, int nobc_in,
+	       int *wbcnode_in,int *obcnode_in, 
+	       int ntypes_in,int *nv_in, int *nc_in, int **vconn_in);
+
+  void searchInverseMap(double *xsearch,int *iblank, int *fringe,
+			double *deltax,double *rcap,int nsearch);
+
+  void createSearchPoints(void);
 
   void setQ(int nvar, double* qin);
 
@@ -61,9 +87,13 @@ public:
 
   void preprocess(ADT* adt);
 
+  void preprocess(void);
+
   void search();
 
   void interpolate(int nvar);
+
+  void outputIblankStats(void);
 };
 
 } // namespace PIFUS

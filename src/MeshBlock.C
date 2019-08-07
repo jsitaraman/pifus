@@ -1,6 +1,5 @@
 
 #include "MeshBlock.h"
-#include "pifus_types.h"
 #include "pifus_ext.h"
 
 #include <stdio.h>
@@ -8,8 +7,6 @@
 #ifdef ENABLE_OPENMP
 #include <omp.h>
 #endif
-
-#define PIFUS_BASE 0
 
 namespace PIFUS {
 
@@ -112,7 +109,7 @@ void MeshBlock::search()
       weights[i]=(double *) malloc(sizeof(double)*m);
       pindx[i]=(int *)malloc(sizeof(int)*m/3);
       pcount[i]=m/3;
-      for(p=0;p<m/3;p++) pindx[i][p]=indx[p]-PIFUS_BASE;
+      for(p=0;p<m/3;p++) pindx[i][p]=indx[p];
       interprbf_(xcloud,&(xtarget[3*i]),weights[i],&pcount[i],&itype,&iflag);      
       //for(p=0;p<pcount[i];p++) TRACED(weights[i][p]);
       //interpls1_(xcloud,&(xtarget[3*i]),weights[i],&pcount[i],&iflag);      
@@ -134,5 +131,27 @@ void MeshBlock::interpolate(int nvar)
     }
   }
 }
+
+void MeshBlock::outputIblankStats(void)
+  {
+    int nfringe,nfield,nfound;
+    nfringe=nfield=nfound=0;
+    for(int i=0;i<ncells;i++)
+      {
+	if (iblank[i]==1) {
+	  nfield++;
+	} else if (iblank[i] < 0) {
+	  nfound++;
+	  if (iblank[i]==-1) nfringe++;
+	} 
+      }	
+    printf("\n");
+    TRACEI(ncells);
+    TRACEI(nfield);
+    TRACEI(nfringe);
+    TRACEI(nfound);
+    printf("\n");
+  }
+
 
 } // namespace PIFUS

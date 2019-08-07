@@ -1,9 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<stdarg.h>
 #include "pifus.h"
+#include "pifus_types.h"
 using namespace PIFUS;
-#define MAXBLOCKS 100;
+#define MAXBLOCKS 100
 pifus *pf;
 /*
 ** pointer storage for connectivity arrays that
@@ -34,7 +36,7 @@ extern "C" {
   {
     pf->registerSolution(*btag,*nvar,q);
   }
-  void pifus_registergrid_data(int *bid,int *btag,int *c2f,int *face,
+  void pifus_registergrid_data_(int *bid,int *btag,int *c2f,int *face,
 			       int *nfaces,int *nnodes,
 			       double *xyz,int *ibl,int *nwbc, 
 			       int *nobc,int *wbcnode,
@@ -42,13 +44,12 @@ extern "C" {
   {
     va_list arguments;
     int i;
-    int iblk=*bid-BASE;
+    int iblk=*bid-PIFUS_BASE;
 
     va_start(arguments, ntypes);
-
-    if(idata[iblk].nv) TIOGA_FREE(idata[iblk].nv);
-    if(idata[iblk].nc) TIOGA_FREE(idata[iblk].nc);
-    if(idata[iblk].vconn) TIOGA_FREE(idata[iblk].vconn);
+    if(idata[iblk].nv) PIFUS_FREE(idata[iblk].nv);
+    if(idata[iblk].nc) PIFUS_FREE(idata[iblk].nc);
+    if(idata[iblk].vconn) PIFUS_FREE(idata[iblk].vconn);
     idata[iblk].nv=(int *) malloc(sizeof(int)*(*ntypes));
     idata[iblk].nc=(int *) malloc(sizeof(int)*(*ntypes));
     idata[iblk].vconn=(int **)malloc(sizeof(int *)*(*ntypes));
@@ -64,6 +65,11 @@ extern "C" {
 			 wbcnode,obcnode,
 			 *ntypes,idata[iblk].nv,idata[iblk].nc,idata[iblk].vconn);
     
+  }
+
+  void pifus_preprocess_(void)
+  {
+    pf->preprocess();
   }
 
   void pifus_register_targets_(int *btag, int *nvar, int *ntargets,double *x, double *q)
@@ -82,6 +88,12 @@ extern "C" {
       }
 	
   }
+
+  void pifus_connect_(void)
+  {
+    pf->connect();
+  }
+
  void pifus_delete_(void)
   {
    delete [] pf;

@@ -13,7 +13,7 @@ add_executable(pifus_accuracy.exe pifus_accuracy.f90)
 target_link_libraries(pifus_accuracy.exe pifusdriver)
 
 add_executable(test_connect.exe test_connect.f90 gridutils.f90 findboundaryface.f90 modules.f90)
-target_link_libraries(test_connect.exe ${MPI_Fortran_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries(test_connect.exe pifusdriver ${MPI_Fortran_LIBRARIES} ${CMAKE_DL_LIBS})
 
 if (ENABLE_GPU_CODE)
   set_target_properties(pifusdriver PROPERTIES

@@ -12,6 +12,72 @@ __device__ int faceEdgeIntersectCheck(REAL xface[4][3],
 			   REAL EPS1,
 			   REAL EPS2,
 			   int nvert);
+
+__global__
+void cellparams(double *cellvol,double *cellcenter,double *x,
+		int *ndc4,int *ndc5,int *ndc6, int *ndc8,
+		int ntetra,int npyra,int nprizm,int nhexa,int ncells)
+{
+#ifdef GPU
+  int idx=blockIdx.x*blockDim.x + threadIdx.x;
+  if (idx < ncells)
+#else
+  for (int idx;idx < ncells;idx++)
+#endif
+    {
+      double xv[8][3];
+      cellcenter[3*idx]=cellcenter[3*idx+1]=cellcenter[3*idx+2]=0;	  
+      int icell;
+      if (idx < ntetra) 
+	{
+	  icell=idx;
+	  for(int j=0;j < 4;j++)
+	    for(int k=0;k<3;k++)
+	      {
+		xv[j][k]=x[3*(ndc4[4*idx+j]-PIFUS_BASE)+k];
+		cellcenter[3*idx+k]+=xv[j][k];
+	      }
+	  cellvol[idx]=computeCellVolume(xv,4);
+	  for(int k=0;k<3;k++) cellcenter[3*idx+k]*=0.25;
+	}
+      else if (idx < ntetra + npyra)
+	{
+	  icell=idx-ntetra;
+	  for(int j=0;j < 5;j++)
+	    for(int k=0;k<3;k++)
+	      {
+		xv[j][k]=x[3*(ndc5[5*icell+j]-PIFUS_BASE)+k];
+		cellcenter[3*idx+k]+=xv[j][k];
+	      }
+	  cellvol[idx]=computeCellVolume(xv,5);
+	  for(int k=0;k<3;k++) cellcenter[3*idx+k]*=0.2;
+	}
+      else if (idx < ntetra + npyra + nprizm)
+	{
+	  icell=idx-ntetra-npyra;
+	  for(int j=0;j < 6;j++)
+	    for(int k=0;k<3;k++)
+	      {
+		xv[j][k]=x[3*(ndc6[6*icell+j]-PIFUS_BASE)+k];
+		cellcenter[3*idx+k]+=xv[j][k];
+	      }
+	  cellvol[idx]=computeCellVolume(xv,6);
+	  for(int k=0;k<3;k++) cellcenter[3*idx+k]*=0.1666666667;
+	}
+      else if (idx < ntetra + npyra + nprizm + nhexa)
+	{
+	  icell=idx-ntetra-npyra-nprizm;
+	  for(int j=0;j < 8;j++)
+	    for(int k=0;k<3;k++)
+	      {
+		xv[j][k]=x[3*(ndc8[8*icell+j]-PIFUS_BASE)+k];
+		cellcenter[3*idx+k]+=xv[j][k];
+	      }
+	  cellvol[idx]=computeCellVolume(xv,8);
+	  for(int k=0;k<3;k++) cellcenter[3*idx+k]*=0.125;
+	}
+    }
+}	  
 __global__ void donorSearch(int *ndc4,
 		 int *ndc5,
 		 int *ndc6,
@@ -39,7 +105,9 @@ __global__ void donorSearch(int *ndc4,
                  //!int* compactionIndex,
                  //!int* recipient)
 {
+#ifdef GPU
   int idx=blockIdx.x*blockDim.x + threadIdx.x;
+#endif
   int e[8],i,j,k,nvert;
   int icell,nfaces,ipoly;
   REAL xx[3],xp[3],xi[3];
@@ -58,8 +126,11 @@ __global__ void donorSearch(int *ndc4,
   REAL ds[3];
   REAL xmin[3];
   // FILE *fp;
-
+#ifdef GPU
   if (idx < nsearch)
+#else
+  for(int idx=0;idx < nsearch;idx++)
+#endif
     {
       xmin[0]=xminx;
       xmin[1]=xminy;
@@ -85,7 +156,6 @@ __global__ void donorSearch(int *ndc4,
     if ( j < 0 || j > mdim[1]-1) inside=0;
     if ( k < 0 || k > mdim[2]-1) inside=0;
     //
-  
     if (inside) {
       indx=k*mdim[1]*mdim[0]+j*mdim[0]+i;
       idonor=auxGrid[indx];
@@ -134,26 +204,27 @@ __global__ void donorSearch(int *ndc4,
 	    k=0;
 	    intersect=0;
 	    
-// 	    fp=fopen("cell.dat","w");
-// 	    fprintf(fp,"TITLE=cell file\n");
-// 	    fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\"\n");
-// 	    fprintf(fp,"ZONE T=\"VOL_MIXED\",N=6 E=1 ET=BRICK, F=FEPOINT\n");
-// 	    for(j=0;j<nvert;j++)
-// 	      fprintf(fp,"%f %f %f\n",x[3*e[j]],x[3*e[j]+1],x[3*e[j]+2]);
-// 	    fprintf(fp,"1 2 3 3 4 5 6 6\n");
-// 	    fprintf(fp,"ZONE\n");
-// 	    fprintf(fp,"%f %f %f\n",xx[0],xx[1],xx[2]);
-// 	    fprintf(fp,"%f %f %f\n",xp[0],xp[1],xp[2]);
-// 	    fclose(fp);
+ 	    // FILE *fp=fopen("cell.dat","w");
+ 	    // fprintf(fp,"TITLE=cell file\n");
+ 	    // fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\"\n");
+ 	    // fprintf(fp,"ZONE T=\"VOL_MIXED\",N=6 E=1 ET=BRICK, F=FEPOINT\n");
+ 	    // for(j=0;j<nvert;j++)
+ 	    //   fprintf(fp,"%f %f %f\n",x[3*(e[j]-1)],x[3*(e[j]-1)+1],x[3*(e[j]-1)+2]);
+ 	    // fprintf(fp,"1 2 3 4 5 6 7 8\n");
+ 	    // fprintf(fp,"ZONE\n");
+ 	    // fprintf(fp,"%f %f %f\n",xx[0],xx[1],xx[2]);
+ 	    // fprintf(fp,"%f %f %f\n",xp[0],xp[1],xp[2]);
+ 	    // fclose(fp);
 
 	    k=0;
 	    while(k<nfaces && !intersect)
 	      {
+		//for(int l=0;l<6;l++) TRACEI(neig[6*idonor+l]);
 		if (neig[6*idonor+k]!=donorPrev && !intersect)
 		  {
 		    for(j=0;j<numverts[ipoly][k];j++)
 		      {
-			findx=e[faceInfo[ipoly][4*k+j]-1];
+			findx=e[faceInfo[ipoly][4*k+j]-1]-PIFUS_BASE;
 			xface[j][0]=x[3*findx];
 			xface[j][1]=x[3*findx+1];
 			xface[j][2]=x[3*findx+2];
@@ -171,32 +242,37 @@ __global__ void donorSearch(int *ndc4,
 		k++;
 	      }
 	    
-	    if (!intersect){
-	      if (scfac[idonor] < rcap[idx]) {
-		interp[idonor]=idx;
-                fringe[0+2*idx]=idonor;
-                fringe[1+2*idx]=idx;
-                //! fringe[idx] = idonor
-
-                //!compactionIndex[idx]=0;
-                //!recipient[idx] = idx;
-		//deltax[3*idonor]=xx[0]-cellCenter[3*idonor];
-		//deltax[3*idonor+1]=xx[1]-cellCenter[3*idonor+1];
-		//deltax[3*idonor+2]=xx[2]-cellCenter[3*idonor+2];
-		deltax[3*idx]=xx[0]-cellCenter[3*idonor];
-		deltax[3*idx+1]=xx[1]-cellCenter[3*idonor+1];
-		deltax[3*idx+2]=xx[2]-cellCenter[3*idonor+2];
-		iblank[idx]=-1;
+	    if (!intersect) {
+	      if (idonor >=0) {
+		if (scfac[idonor] < rcap[idx]) {
+		  interp[idonor]=idx;
+		  fringe[0+2*idx]=idonor;
+		  fringe[1+2*idx]=idx;
+		  //! fringe[idx] = idonor
+		  
+		  //!compactionIndex[idx]=0;
+		  //!recipient[idx] = idx;
+		  //deltax[3*idonor]=xx[0]-cellCenter[3*idonor];
+		  //deltax[3*idonor+1]=xx[1]-cellCenter[3*idonor+1];
+		  //deltax[3*idonor+2]=xx[2]-cellCenter[3*idonor+2];
+		  deltax[3*idx]=xx[0]-cellCenter[3*idonor];
+		  deltax[3*idx+1]=xx[1]-cellCenter[3*idonor+1];
+		  deltax[3*idx+2]=xx[2]-cellCenter[3*idonor+2];
+		  iblank[idx]=-1;
+		}
+		else {
+		  iblank[idx]=-2;
+		}	    
 	      }
 	      else {
-		iblank[idx]=-2;
-	      }	    
+		iblank[idx]=0;
+	      }
 	      searchComplete=1;
+	    }
 	  }
-	}
       }
     }
-  }    
+  }  
 }	
 
 __device__ int faceEdgeIntersectCheck(REAL xface[4][3],
@@ -276,14 +352,24 @@ __global__ void find_neighbors(int *c2f,
 			       int *neig,
 			       int ncells)
 {
+#ifdef GPU
   int idx=blockIdx.x*blockDim.x + threadIdx.x;
+#endif
   int j,faceid,c1,c2;
+  //FILE *fp;
 
+#ifdef GPU
+  if (idx < ncells)
+#else
+    //    fp=fopen("facedebug.dat","w");
+    for(int idx=0;idx < ncells;idx++)
+#endif
   if (idx < ncells) 
    {
     for(j=0;j<6;j++)
       {
 	faceid=c2f[6*idx+j];
+	//fprintf(fp,"%d %d %d %d\n",idx,faceid,face[2*faceid],face[2*faceid+1]);
 	if (faceid >=0) {
 	  c1=face[2*faceid];
 	  c2=face[2*faceid+1];
@@ -295,23 +381,15 @@ __global__ void find_neighbors(int *c2f,
 	  }
 	}
       }
-  }
+   }
+  //    fclose(fp);
 }
 
-
-// -*- c++ -*- 
-//#include "precision.h"
-#define BIGVAL 1E6
-//#include<math.h>
-//#include<stdio.h>
-//#include<stdlib.h>
-#define REAL double
 __global__ void preprocess_nb_grid(int *ndc4,
 			int *ndc5,
 			int *ndc6,
 			int *ndc8,
 			REAL *x,
-			REAL *cellCenter,
 			REAL *cellVol,
 			REAL dsx,REAL dsy,REAL dsz,
 			REAL xminx,REAL xminy,REAL xminz,
@@ -327,7 +405,9 @@ __global__ void preprocess_nb_grid(int *ndc4,
 			int ncells)
 
 {
+#ifdef GPU
   int idx=blockIdx.x*blockDim.x + threadIdx.x;
+#endif
   int e[8],i,j,k,nvert,iflag;
   int icell;
   REAL xx;
@@ -335,8 +415,11 @@ __global__ void preprocess_nb_grid(int *ndc4,
   REAL xmin[3],ds[3];
   int mdim[3];
   int ixmin[3],ixmax[3];
-
+#ifdef GPU
   if (idx < ncells)
+#else
+  for (int idx;idx < ncells;idx++)
+#endif
   {
     xmin[0]=xminx;
     xmin[1]=xminy;
@@ -385,7 +468,7 @@ __global__ void preprocess_nb_grid(int *ndc4,
     for(i=0;i<nvert;i++)
       for(k=0;k<3;k++)
 	{
-	  xx=x[3*e[i]+k];
+	  xx=x[3*(e[i]-PIFUS_BASE)+k];
 	  axmin[k]=axmin[k] > xx ? xx : axmin[k];
 	  axmax[k]=axmax[k] < xx ? xx : axmax[k];
 	}
@@ -444,8 +527,14 @@ __global__ void preprocess_nb_grid(int *ndc4,
 
 __global__ void set_tag(int *itag,int nnodes)
 {
+#ifdef GPU
   int idx=blockIdx.x*blockDim.x + threadIdx.x;;
+#endif
+#ifdef GPU
   if (idx < nnodes)
+#else
+ for(int idx = 0 ;idx < nnodes;idx++)
+#endif
     {
       itag[idx]=0;
     }
@@ -453,8 +542,14 @@ __global__ void set_tag(int *itag,int nnodes)
 
 __global__ void set_interp(int *interp,int ncells)
 {
+#ifdef GPU
   int idx=blockIdx.x*blockDim.x + threadIdx.x;
+#endif
+#ifdef GPU
   if (idx < ncells)
+#else
+    for(int idx =0;idx <ncells;idx++)
+#endif
     {
       interp[idx]=-1;
     }
@@ -462,8 +557,14 @@ __global__ void set_interp(int *interp,int ncells)
   
 __global__ void set_wbc_tags(int *itag,int *wbcnode,int nwbc)
 {
+#ifdef GPU
   int idx=blockIdx.x*blockDim.x + threadIdx.x;
+#endif
+#ifdef GPU
   if (idx < nwbc)
+#else
+  for(int idx =0 ;idx < nwbc;idx++)
+#endif
     {
       itag[wbcnode[idx]]=1;
     }
@@ -471,32 +572,51 @@ __global__ void set_wbc_tags(int *itag,int *wbcnode,int nwbc)
 
 __global__ void set_obc_tags(int *itag,int *obcnode,int nobc)
 {
+#ifdef GPU
     int idx=blockIdx.x*blockDim.x + threadIdx.x;
+#endif
+#ifdef GPU
     if (idx < nobc)
+#else
+   for(int idx=0;idx < nobc;idx++)
+#endif
       {
 	itag[obcnode[idx]]=2;
       }
 }			
 
-__global__ void setScalar(int N, int* vec, int val)
-{
-   int idx = blockIdx.x*blockDim.x + threadIdx.x;
-   if (idx < N)
-     {
-        vec[idx]=val;
-     }
-}
-
 
 template < typename T >
 __global__ void setVector(int nr, int nc, T* vec, T val)
 {
+#ifdef GPU
    int idx = blockIdx.x*blockDim.x + threadIdx.x;
+#endif
+#ifdef GPU
    if (idx < nr)
+#else
+   for(int idx=0;idx < nr;idx++)
+#endif
     {
      vec[0+nc*idx]=val;
      vec[1+nc*idx]=val;
      vec[2+nc*idx]=val;
+    }
+}
+
+template < typename T >
+__global__ void setArray(int nr, T* vec, T val)
+{
+#ifdef GPU
+   int idx = blockIdx.x*blockDim.x + threadIdx.x;
+#endif
+#ifdef GPU
+   if (idx < nr)
+#else
+   for(int idx=0;idx < nr;idx++)
+#endif
+    {
+     vec[idx]=val;
     }
 }
 

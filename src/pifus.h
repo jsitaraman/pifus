@@ -38,7 +38,9 @@ public:
 			double *xyz, int *iblank,
 			int nfaces,int nwbc, int nobc, 
 			int *wbcnode,int *obcnode,
-			int ntypes,int *nv, int *nc, int *vconn);
+			int ntypes,int *nv, int *nc, int **vconn);
+  void preprocess(void);
+  void connect(void);
 };
 
 } // namespace PIFUS

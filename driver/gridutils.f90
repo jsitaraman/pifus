@@ -61,12 +61,14 @@ g%nghost=0
 g%ndof=g%ncells+g%nghost
 !
 allocate(g%x(3*g%nv),g%bodytag(g%nv),g%iblank(g%nv))
+allocate(g%iblank_cell(g%nCells));
 allocate(g%scal(g%nvar))
 allocate(g%xcentroid(3*g%ndof))
 allocate(g%q(g%nvar*g%nv))
 allocate(g%dq(3*g%nvar*g%nv))
 !
 g%iblank=1
+g%iblank_cell=1;
 !
 ! read coordinates and body tag 
 ! also create some conservative variables
@@ -149,7 +151,9 @@ enddo
 call find_faces(g%face,g%c2f,g%nfaces,g%iblank,g%ndc4,g%ndc5,g%ndc6,g%ndc8,&
      g%nv,g%n4,g%n5,g%n6,g%n8)
 
-write(6,*) 'n6,n8,nfaces',g%n6,g%n8,g%nfaces
+!write(6,*) 'n6,n8,nfaces',g%n6,g%n8,g%nfaces
+!write(6,*) g%c2f(1:6)
+!write(6,*) g%face(1:12)
 !
 return
 !

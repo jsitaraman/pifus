@@ -6,4 +6,4 @@
 # define PIFUS_FREE(a1)  {free(a1);a1=NULL;}
 # define PIFUS_BIGVALUE 1e15
 # define PIFUS_TOL 1e-6
-
+# define PIFUS_BASE 1
