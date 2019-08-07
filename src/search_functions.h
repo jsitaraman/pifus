@@ -1,7 +1,7 @@
 // -*- c++ -*- 
 //#include "precision.h"
-#define BIGVAL 1E6	
-#define TOL 1e-7
+//#define PIFUS_BIGVALUE 1E6	
+//#define PIFUS_TOL 1e-10
 #include<math.h>
 #include<stdio.h>
 #define REAL double
@@ -13,6 +13,32 @@ __device__ int faceEdgeIntersectCheck(REAL xface[4][3],
 			   REAL EPS2,
 			   int nvert);
 
+
+__global__
+void cutHole(double xmin, double ymin, double zmin,
+	     double xmax, double ymax, double zmax,
+	     double *xsearch,
+	     int *iblank,
+	     int nsearch)
+{
+#ifdef GPU
+  int idx=blockIdx.x*blockDim.x + threadIdx.x;
+  if (idx < nsearch)
+#else
+  for (int idx;idx < nsearch;idx++)
+#endif
+  {
+  if (iblank[idx]==1) {
+    if ( (xsearch[3*idx]-xmin)*(xsearch[3*idx]-xmax) < PIFUS_TOL &&
+         (xsearch[3*idx+1]-ymin)*(xsearch[3*idx+1]-ymax) < PIFUS_TOL &&       	     
+         (xsearch[3*idx+2]-zmin)*(xsearch[3*idx+1]-zmax) < PIFUS_TOL )
+          iblank[idx]=0;
+    }
+  else if (iblank[idx]==-2) {
+    iblank[idx]=1;
+    }
+  }
+}
 __global__
 void cellparams(double *cellvol,double *cellcenter,double *x,
 		int *ndc4,int *ndc5,int *ndc6, int *ndc8,
@@ -229,7 +255,7 @@ __global__ void donorSearch(int *ndc4,
 			xface[j][1]=x[3*findx+1];
 			xface[j][2]=x[3*findx+2];
 		      }		
-		    intersect=faceEdgeIntersectCheck(xface,xx,xp,xi,-TOL,TOL,
+		    intersect=faceEdgeIntersectCheck(xface,xx,xp,xi,-PIFUS_TOL,PIFUS_TOL,
 						     numverts[ipoly][k]);
 		    if (intersect) {
 		      donorPrev=idonor;
@@ -460,8 +486,8 @@ __global__ void preprocess_nb_grid(int *ndc4,
 	  e[k]=ndc8[icell+k];
       }
     
-    axmin[0]=axmin[1]=axmin[2]=BIGVAL;
-    axmax[0]=axmax[1]=axmax[2]=-BIGVAL;
+    axmin[0]=axmin[1]=axmin[2]=PIFUS_BIGVALUE;
+    axmax[0]=axmax[1]=axmax[2]=-PIFUS_BIGVALUE;
     //
     // find the bounding box of the given cell
     //
@@ -515,7 +541,7 @@ __global__ void preprocess_nb_grid(int *ndc4,
     
     if (iflag > 0) 
       {
-	scfac[idx]=BIGVAL;
+	scfac[idx]=PIFUS_BIGVALUE;
       }
     else
       {

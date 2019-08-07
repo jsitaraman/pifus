@@ -17,6 +17,7 @@ set(PIFUS_SOURCES
 if (BUILD_GPU_CODE)
   set (PIFUS_SOURCES ${PIFUS_SOURCES}
        # CUDA sources
+       dMeshBlock2.cu
        dMeshBlock.cu
        dADT.cu
       )

@@ -1,7 +1,6 @@
 
 #include "pifus.h"
 #include "pifus_types.h"
-#include "pifus_cuda.h"
 #include "MeshBlock.h"
 #include "dMeshBlock.h"
 
@@ -109,11 +108,13 @@ void pifus::registerTargets(int btag, int nvar, int ntargets, double *targetxyz,
 
 void pifus::preprocess(void)
 {
+  myTimer("Preprocessing",0);
   for(int ib=0;ib<nblocks;ib++)
     {
       auto &dmb=dmblocks[ib];
       dmb->preprocess();
     }
+  myTimer("Preprocessing",1);
 }
 void pifus::searchAndInterpolate_gpu(int nvar)
 {
@@ -162,6 +163,7 @@ void pifus::searchAndInterpolate(int nvar)
 
 void pifus::connect(void)
 {
+  myTimer("Connect",0);
   for(int ib=0;ib<nblocks;ib++)
     {
       auto &dmb=dmblocks[ib];
@@ -178,11 +180,12 @@ void pifus::connect(void)
       dmb->searchInverseMap(omb->xquery,omb->iblank,omb->fringe,
 			   omb->deltax,omb->scfac,omb->nquery);
     }
+  myTimer("Connect",1);
   for(int ib=0;ib<nblocks;ib++)
     {
       auto &dmb=dmblocks[ib];
       auto &mb=mblocks[ib];
-      pullFromDevice(mb->iblank,dmb->iblank,dmb->ncells*sizeof(int));
+      dmb->getIblanks(mb->iblank);
       mb->outputIblankStats();
     }
 }    

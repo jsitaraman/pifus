@@ -17,6 +17,9 @@ namespace PIFUS {
   {
     btag=btag_in;
     nnodes=nnodes_in;
+    nobc=nobc_in;
+    nwbc=nwbc_in;
+
     for(int i=0;i<ntypes;i++)
       ncells+=nc[i];
     xmin[0]=xmin[1]=xmin[2]=PIFUS_BIGVALUE;
@@ -33,10 +36,9 @@ namespace PIFUS {
     for(int i=0;i<nwbc;i++)
       for(int k=0;k<3;k++)
 	{
-	  xwbmin[k]=PIFUS_MIN(xwbmin[k],x_in[3*(wbcnode[i]-PIFUS_BASE)+k]);
-	  xwbmax[k]=PIFUS_MAX(xwbmax[k],x_in[3*(wbcnode[i]-PIFUS_BASE)+k]);
+	  xwbmin[k]=PIFUS_MIN(xwbmin[k],x_in[3*(wbcnode_in[i]-PIFUS_BASE)+k]);
+	  xwbmax[k]=PIFUS_MAX(xwbmax[k],x_in[3*(wbcnode_in[i]-PIFUS_BASE)+k]);
 	}
-
     for(int k=0;k<3;k++)
       {
 	xmin[k]-=PIFUS_TOL;
@@ -49,8 +51,6 @@ namespace PIFUS {
     pushToDeviceInt(face,face_in,2*nfaces*sizeof(int));
     pushToDeviceDouble(x,x_in,3*nnodes*sizeof(double));
     pushToDeviceInt(iblank,iblank_in,ncells*sizeof(int));
-    nobc_in=nobc;
-    nwbc_in=nwbc;
     pushToDeviceInt(wbcnode,wbcnode_in,nwbc*sizeof(int));
     pushToDeviceInt(obcnode,obcnode_in,nobc*sizeof(int));
     for(int i=0;i<ntypes;i++)
@@ -152,6 +152,12 @@ namespace PIFUS {
 		rcap,
 		iblank,
 		nsearch);
+
+    cutHole(xwbmin[0],xwbmin[1],xwbmin[2],
+	    xwbmax[0],xwbmax[1],xwbmin[3],
+	    xsearch,
+	    iblank,
+	    nsearch);
     
   }
 
@@ -175,5 +181,11 @@ void dMeshBlock::outputIblankStats(void)
     TRACEI(nfound);
     printf("\n");
   }  
+
+  void dMeshBlock::getIblanks(int *iblankH)
+  {
+    pullFromDevice(iblankH,iblank,ncells*sizeof(int));
+  }
+
 
 }

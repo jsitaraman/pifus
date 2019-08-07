@@ -134,22 +134,22 @@ void MeshBlock::interpolate(int nvar)
 
 void MeshBlock::outputIblankStats(void)
   {
-    int nfringe,nfield,nfound;
-    nfringe=nfield=nfound=0;
+    int nfringe,nfield,nfound,nhole;
+    nfringe=nfield=nhole=0;
     for(int i=0;i<ncells;i++)
       {
 	if (iblank[i]==1) {
 	  nfield++;
-	} else if (iblank[i] < 0) {
-	  nfound++;
+	} else if (iblank[i] <= 0) {
 	  if (iblank[i]==-1) nfringe++;
+	  if (iblank[i]== 0) nhole++;
 	} 
       }	
     printf("\n");
     TRACEI(ncells);
     TRACEI(nfield);
     TRACEI(nfringe);
-    TRACEI(nfound);
+    TRACEI(nhole);
     printf("\n");
   }
 

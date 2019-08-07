@@ -5,6 +5,8 @@
 
 #include <cuda.h>
 
+#define nblocks(a,b) ((a)/(b) + ((a)%(b)==0 ? 0:1))
+
 #define pushToDeviceDouble(xD, xH, size)                                       \
   {                                                                            \
     cudaMalloc((void**)&xD, (size));                                           \

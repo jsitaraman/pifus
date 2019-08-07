@@ -94,6 +94,8 @@ public:
   void interpolate(int nvar);
 
   void outputIblankStats(void);
+
+  void getIblanks(int *iblankH);
 };
 
 } // namespace PIFUS
