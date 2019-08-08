@@ -43,24 +43,29 @@ double computeCellVolume(double xv[8][3],int nvert)
  for(int iface=0;iface<nfaces;iface++)
    {
      if (numverts[itype][iface]==3) {
-       vol-=0.5*scalarProduct(xv[faceInfo[itype][4*iface]+0],
-			      xv[faceInfo[itype][4*iface]+1],
-			      xv[faceInfo[itype][4*iface]+2]);
+       vol-=0.5*scalarProduct(xv[faceInfo[itype][4*iface+0]-1],
+			      xv[faceInfo[itype][4*iface+1]-1],
+			      xv[faceInfo[itype][4*iface+2]-1]);
      } else {
-       vol-=0.25*scalarProduct(xv[faceInfo[itype][4*iface]+0],
-			       xv[faceInfo[itype][4*iface]+1],
-			       xv[faceInfo[itype][4*iface]+2]);
-       vol-=0.25*scalarProduct(xv[faceInfo[itype][4*iface]+0],
-			       xv[faceInfo[itype][4*iface]+2],
-			       xv[faceInfo[itype][4*iface]+3]);
-       vol-=0.25*scalarProduct(xv[faceInfo[itype][4*iface]+0],
-			       xv[faceInfo[itype][4*iface]+1],
-			       xv[faceInfo[itype][4*iface]+3]);
-       vol-=0.25*scalarProduct(xv[faceInfo[itype][4*iface]+1],
-			       xv[faceInfo[itype][4*iface]+2],
-			       xv[faceInfo[itype][4*iface]+3]);
+       vol-=0.25*scalarProduct(xv[faceInfo[itype][4*iface+0]-1],
+			       xv[faceInfo[itype][4*iface+1]-1],
+			       xv[faceInfo[itype][4*iface+2]-1]);
+       vol-=0.25*scalarProduct(xv[faceInfo[itype][4*iface+0]-1],
+			       xv[faceInfo[itype][4*iface+2]-1],
+			       xv[faceInfo[itype][4*iface+3]-1]);
+       vol-=0.25*scalarProduct(xv[faceInfo[itype][4*iface+0]-1],
+			       xv[faceInfo[itype][4*iface+1]-1],
+			       xv[faceInfo[itype][4*iface+3]-1]);
+       vol-=0.25*scalarProduct(xv[faceInfo[itype][4*iface+1]-1],
+			       xv[faceInfo[itype][4*iface+2]-1],
+			       xv[faceInfo[itype][4*iface+3]-1]);
      }
    }
  vol/=3.0;
+ // TODO:
+ // this line is a kludge now to weaken off-body resolution
+ // have to be fixed properly
+ //
+ if (itype==3) vol*=100;
  return vol;
 }

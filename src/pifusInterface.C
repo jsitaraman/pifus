@@ -94,6 +94,11 @@ extern "C" {
     pf->connect();
   }
 
+  void pifus_writeoutput_(void)
+  {
+    pf->writeOutput();
+  }
+
  void pifus_delete_(void)
   {
    delete [] pf;

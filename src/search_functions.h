@@ -30,8 +30,8 @@ void cutHole(double xmin, double ymin, double zmin,
   {
   if (iblank[idx]==1) {
     if ( (xsearch[3*idx]-xmin)*(xsearch[3*idx]-xmax) < PIFUS_TOL &&
-         (xsearch[3*idx+1]-ymin)*(xsearch[3*idx+1]-ymax) < PIFUS_TOL &&       	     
-         (xsearch[3*idx+2]-zmin)*(xsearch[3*idx+1]-zmax) < PIFUS_TOL )
+         (xsearch[3*idx+1]-ymin)*(xsearch[3*idx+1]-ymax) < PIFUS_TOL &&
+         (xsearch[3*idx+2]-zmin)*(xsearch[3*idx+2]-zmax) < PIFUS_TOL )
           iblank[idx]=0;
     }
   else if (iblank[idx]==-2) {
@@ -270,7 +270,11 @@ __global__ void donorSearch(int *ndc4,
 	    
 	    if (!intersect) {
 	      if (idonor >=0) {
-		if (scfac[idonor] < rcap[idx]) {
+                double donorRes=scfac[idonor];
+                for(int k=0;k<nfaces;k++) 
+                  if (neig[6*idonor+k] >= 0)
+                     donorRes=PIFUS_MAX(donorRes,scfac[neig[6*idonor+k]]);
+		if (donorRes < rcap[idx]) {
 		  interp[idonor]=idx;
 		  fringe[0+2*idx]=idonor;
 		  fringe[1+2*idx]=idx;
@@ -519,7 +523,7 @@ __global__ void preprocess_nb_grid(int *ndc4,
     iflag=0;
     for(i=0;i<nvert;i++) 
       {
-	iflag=iflag + (itag[e[i]] == 1);
+	iflag=iflag + (itag[e[i]-PIFUS_BASE] == 1);
       }
     
     if (iflag > 0) 
@@ -536,7 +540,7 @@ __global__ void preprocess_nb_grid(int *ndc4,
     iflag=0;
     for(i=0;i<nvert;i++) 
       {
-	iflag=iflag + (itag[e[i]] == 2);
+	iflag=iflag + (itag[e[i]-PIFUS_BASE] == 2);
       }
     
     if (iflag > 0) 

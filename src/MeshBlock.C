@@ -154,4 +154,90 @@ void MeshBlock::outputIblankStats(void)
   }
 
 
+void MeshBlock::writeCellFile(int bid)
+{
+  char fname[80];
+  char qstr[2];
+  char intstring[7];
+  char hash,c;
+  int i,n,j;
+  int bodytag;
+  FILE *fp;
+  int ba;
+  int nvert;
+  sprintf(intstring,"%d",100000+bid);
+  sprintf(fname,"cell%s.dat",&(intstring[1]));
+  fp=fopen(fname,"w");
+  fprintf(fp,"TITLE =\"PIFUS output\"\n");
+  fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\",\"BTAG\",\"IBLANK_CELL\",\"CELLVOLUME\", ");
+  fprintf(fp,"\n");
+  fprintf(fp,"ZONE T=\"VOL_MIXED\",N=%d E=%d ET=BRICK, F=FEBLOCK\n",nnodes,
+	  ncells);
+  fprintf(fp,"VARLOCATION =  (1=NODAL, 2=NODAL, 3=NODAL, 4=NODAL, 5=CELLCENTERED, 6=CELLCENTERED)\n");
+  for(i=0;i<nnodes;i++) fprintf(fp,"%lf\n",x[3*i]);
+  for(i=0;i<nnodes;i++) fprintf(fp,"%lf\n",x[3*i+1]);
+  for(i=0;i<nnodes;i++) fprintf(fp,"%lf\n",x[3*i+2]);
+  for(i=0;i<nnodes;i++) fprintf(fp,"%d\n",bid+1);
+  for(i=0;i<ncells;i++) fprintf(fp,"%d\n",iblank[i]);
+  for(i=0;i<ncells;i++) fprintf(fp,"%lf\n",cellvolume[i]);
+  ba=1-PIFUS_BASE;
+  for(n=0;n<ntypes;n++)
+    {
+      nvert=nv[n];
+      for(i=0;i<nc[n];i++)
+	{
+	  if (nvert==4)
+	    {
+	      fprintf(fp,"%d %d %d %d %d %d %d %d\n",
+		      vconn[n][nvert*i]+ba,
+		      vconn[n][nvert*i+1]+ba,
+		      vconn[n][nvert*i+2]+ba,
+		      vconn[n][nvert*i+2]+ba,
+		      vconn[n][nvert*i+3]+ba,
+		      vconn[n][nvert*i+3]+ba,
+		      vconn[n][nvert*i+3]+ba,
+		      vconn[n][nvert*i+3]+ba);
+	    }
+	  else if (nvert==5) 
+	    {
+	      fprintf(fp,"%d %d %d %d %d %d %d %d\n",
+		      vconn[n][nvert*i]+ba,
+		      vconn[n][nvert*i+1]+ba,
+		      vconn[n][nvert*i+2]+ba,
+		      vconn[n][nvert*i+3]+ba,
+		      vconn[n][nvert*i+4]+ba,
+		      vconn[n][nvert*i+4]+ba,
+		      vconn[n][nvert*i+4]+ba,
+		      vconn[n][nvert*i+4]+ba);
+	    }
+	  else if (nvert==6) 
+	    {
+	      fprintf(fp,"%d %d %d %d %d %d %d %d\n",
+		      vconn[n][nvert*i]+ba,
+		      vconn[n][nvert*i+1]+ba,
+		      vconn[n][nvert*i+2]+ba,
+		      vconn[n][nvert*i+2]+ba,
+		      vconn[n][nvert*i+3]+ba,
+		      vconn[n][nvert*i+4]+ba,
+		      vconn[n][nvert*i+5]+ba,
+		      vconn[n][nvert*i+5]+ba);
+	    }
+	  else if (nvert==8)
+	    {
+	      fprintf(fp,"%d %d %d %d %d %d %d %d\n",
+		      vconn[n][nvert*i]+ba,
+		      vconn[n][nvert*i+1]+ba,
+		      vconn[n][nvert*i+2]+ba,
+		      vconn[n][nvert*i+3]+ba,
+		      vconn[n][nvert*i+4]+ba,
+		      vconn[n][nvert*i+5]+ba,
+		      vconn[n][nvert*i+6]+ba,
+		      vconn[n][nvert*i+7]+ba);
+	    }
+	}
+    }
+  fclose(fp);
+  return;
+}
+
 } // namespace PIFUS

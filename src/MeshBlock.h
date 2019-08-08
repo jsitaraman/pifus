@@ -29,6 +29,7 @@ class MeshBlock
   int nwbc,nobc,ntypes,nfaces,ncells;
   int *c2f,*face,*iblank,*wbcnode,*obcnode,*nc,*nv;
   int **vconn;
+  double *cellvolume;
 
 
   MeshBlock() {
@@ -43,6 +44,7 @@ class MeshBlock
     c2f=face=iblank=wbcnode=obcnode=nc=nv=NULL;
     nwbc=nobc=ntypes=nfaces=0;
     vconn=NULL;
+    cellvolume=NULL;
   }
 
  ~MeshBlock() {
@@ -88,6 +90,7 @@ class MeshBlock
     vconn=vconn_in;
     ncells=0;
     for(int i=0;i<ntypes;i++) ncells+=nc[i];
+    cellvolume=(double *)malloc(sizeof(double)*ncells);
   }
 
   void setQ(int nvarin,double *qin) {nvar=nvarin;q=qin;};
@@ -108,6 +111,8 @@ class MeshBlock
   ADT *getADT() {return adt;}
 
   void outputIblankStats(void);
+
+  void writeCellFile(int bid);
 
 };
 

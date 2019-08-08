@@ -49,8 +49,11 @@ program testPifus
   nv1=6
   nv2=8  
   !
+  write(6,*) '# pifus init'
   call pifus_init()
+  write(6,*) '# pifus init timer'
   call pifus_use_timer()
+  write(6,*) '# pifus register'
   !
   do ib=1,2
      g=>gr(ib)
@@ -70,8 +73,10 @@ program testPifus
              1,nv2,g%n8,g%ndc8)        
      endif
   enddo
+  write(6,*) '# pifus preprocess'
   call pifus_preprocess()
   call pifus_connect()
+  call pifus_writeoutput()
   call pifus_delete()
   !
   call mpi_finalize(ierr)

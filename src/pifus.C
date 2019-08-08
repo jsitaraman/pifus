@@ -48,6 +48,7 @@ void pifus::registerGridData(int btag, int nnodes,
 			     int ntypes,int *nv, int *nc, int **vconn)
 {
   int iblk;
+  myTimer("registerGridData",0);
   auto idxit=tag_iblk_map.find(btag);
   if (idxit== tag_iblk_map.end()) {
     mtags.push_back(btag);
@@ -77,6 +78,7 @@ void pifus::registerGridData(int btag, int nnodes,
 	       wbcnode,obcnode,
 	       ntypes,nv,nc,vconn);
   //#endif
+  myTimer("registerGridData",1);
 }
  
   
@@ -186,6 +188,7 @@ void pifus::connect(void)
       auto &dmb=dmblocks[ib];
       auto &mb=mblocks[ib];
       dmb->getIblanks(mb->iblank);
+      dmb->getCellVolume(mb->cellvolume);
       mb->outputIblankStats();
     }
 }    
@@ -210,5 +213,15 @@ pifus::myTimer(char const* info, int type)
     }
   }
 }
+
+void pifus::writeOutput()
+{
+  for(int ib=0;ib<nblocks;ib++)
+    {
+      auto &mb=mblocks[ib];
+      mb->writeCellFile(ib);
+    }
+}
+
 
 } // namespace PIFUS

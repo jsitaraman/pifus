@@ -187,5 +187,8 @@ void dMeshBlock::outputIblankStats(void)
     pullFromDevice(iblankH,iblank,ncells*sizeof(int));
   }
 
-
+ void dMeshBlock::getCellVolume(double *cellvolumeH)
+ {
+  pullFromDevice(cellvolumeH,cellvol,ncells*sizeof(double));
+ }
 }

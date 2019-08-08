@@ -41,6 +41,7 @@ public:
 			int ntypes,int *nv, int *nc, int **vconn);
   void preprocess(void);
   void connect(void);
+  void writeOutput(void);
 };
 
 } // namespace PIFUS

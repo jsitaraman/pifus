@@ -96,6 +96,7 @@ public:
   void outputIblankStats(void);
 
   void getIblanks(int *iblankH);
+  void getCellVolume(double *cellvolumeH);
 };
 
 } // namespace PIFUS
