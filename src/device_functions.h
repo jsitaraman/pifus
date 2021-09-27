@@ -26,7 +26,7 @@ int d_boxRegionIntersect(double *x0,double *vec,double *bbox)
 	  xp[0]=bbox[3*j+0]-x0[0];
 	  xp[1]=bbox[3*k+1]-x0[1];
 	  xp[2]=bbox[3*l+2]-x0[2];
-	  for(d=0;d<2;d++)
+	  for(d=0;d<3;d++)
 	    {
 	      xc[d][m]=xp[0]*vec[3*d]+xp[1]*vec[3*d+1]+xp[2]*vec[3*d+2];
 	      xcmin[d]=(xc[d][m] < xcmin[d])?xc[d][m]:xcmin[d];
