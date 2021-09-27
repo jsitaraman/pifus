@@ -8,6 +8,8 @@ program testpifus
  real*8 :: error
  real*8 :: myfunc,t1,t2
  integer :: i
+ integer :: nseed
+ integer,allocatable :: seed(:)
  !
  if (iargc() < 2) then
     write(6,*) 'Usage : testpifus <npts> <function> <device>'
@@ -30,6 +32,13 @@ program testpifus
  !
  allocate(x(3,n),fx(n))
  allocate(y(3,n),fy(n))
+
+ ! seed the random number generator for reproducible data
+ call random_seed(size=nseed)
+ allocate(seed(nseed))
+ seed = 4 ! set all elements to 4
+ call random_seed(put=seed)
+
  !
  do i=1,n
     call random_number(x(:,i))
@@ -64,4 +73,5 @@ program testpifus
  write(6,*) 'error=',error/m
  !
  deallocate(x,y,fx,fy)
+ deallocate(seed)
 end program testpifus

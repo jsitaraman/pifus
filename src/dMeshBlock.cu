@@ -20,7 +20,7 @@ void d_searchADTRegion(int ndim,int nelem,
   double v0[3][3];
   double vec[9];
   double xcloud[24];
-  int indx[8];	
+  int indx[9];	// 8+1 ... the +1 is a quick fix for memory issues
   int np=8;
   int nchecks;
   int p=0;
@@ -165,7 +165,7 @@ void dMeshBlock::search(void)
                    pindx,
                    weights,
                    ntargets);
-  cudaThreadSynchronize();
+  cudaDeviceSynchronize();
 
 
  /*

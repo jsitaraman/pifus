@@ -8,6 +8,8 @@ program pifus_accuracy
  real*8 :: error0,error,dx0,dx,slope
  real*8 :: myfunc
  integer :: i,h
+ integer :: nseed
+ integer,allocatable :: seed(:)
  !
  if (iargc() < 1) then
     write(6,*) 'Usage : pifus_accuracy <functiontype> <device>'
@@ -29,6 +31,13 @@ program pifus_accuracy
  if (index(functiontype,'quadratic')    > 0) itype=2
  if (index(functiontype,'trig') > 0) itype=3
  write(6,*) 'itype=',itype
+
+ ! seed the random number generator for reproducible data
+ call random_seed(size=nseed)
+ allocate(seed(nseed))
+ seed = 4 ! set all elements to 4
+ call random_seed(put=seed)
+
  !
  n=125
  do h=1,5
@@ -76,4 +85,6 @@ program pifus_accuracy
   !
   deallocate(x,y,fx,fy)
  enddo
+
+ deallocate(seed)
 end program pifus_accuracy

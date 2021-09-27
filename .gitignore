@@ -32,4 +32,5 @@
 *.csv
 *.out
 bin/*
-build/*
+build*
+TAGS
