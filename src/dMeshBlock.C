@@ -12,7 +12,7 @@ namespace {
 __global__
 void d_searchADTRegion(int ndim,int nelem,
      double *x, double *xtarget, int *adtIntegers, double *adtReals,double *adtExtents, 
-     double *coord,int *pcount, int *pindx, double *weights, int ntargets)
+     double *coord,int *ndes,int *pcount, int *pindx, double *weights, int ntargets)
 {
  //int idx = blockIdx.x * blockDim.x + threadIdx.x;
  //if (idx < ntargets)

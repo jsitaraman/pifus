@@ -15,8 +15,10 @@
 __global__
 void d_searchADTRegion(int ndim,int nelem,
                        double *x, double *xtarget, int* isorted, 
-                       int *adtIntegers, double *adtReals,double *adtExtents,int *ndes, 
-                       double *coord,int *pcount, int *pindx, double *weights, int ntargets)
+                       int *adtIntegers, double *adtReals,
+		       double *adtExtents, 
+                       double *coord,int *ndes,int *pcount, 
+		       int *pindx, double *weights, int ntargets)
 {
  int i0 = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -61,11 +63,11 @@ void d_searchADTRegion(int ndim,int nelem,
 		//searchIntersections_region_norecursion(&(indx[p]),adtIntegers,adtReals,
 		//	     coord,0,0,dmin,&(xtarget[3*idx]),vec,nelem,ndim,
                 //             &nchecks);
-//		d_searchIntersections_norecursion(&(indx[p]),adtIntegers,adtReals,coord,
-//                                                 &(xtarget[3*idx]),vec,nelem,ndim,&nchecks);
-
-                d_searchIntersections_norecursion_nostack(&(indx[p]),adtIntegers,adtReals,coord,ndes,
+		d_searchIntersections_norecursion(&(indx[p]),adtIntegers,adtReals,coord,
                                                  &(xtarget[3*idx]),vec,nelem,ndim,&nchecks);
+
+//                d_searchIntersections_norecursion_nostack(&(indx[p]),adtIntegers,adtReals,coord,ndes,
+//                                                 &(xtarget[3*idx]),vec,nelem,ndim,&nchecks);
 
 		//printf("pointIndex, nchecks=%d %d\n",indx[p],nchecks);
               p++;
@@ -184,6 +186,7 @@ void dMeshBlock::search(void)
 		   dadt->adtReals,
                    dadt->adtExtents,
                    dadt->coord,
+                   dadt->ndescendents,
                    pcount,
                    pindx,
                    weights,
