@@ -6,9 +6,11 @@
 #include "pifus_cuda.h"
 #include "device_functions.h"
 
-__device__ __constant__  static double v0[3][3] = {1.0,0.0,0.0,
-                                                   0.0,1.0,0.0,
-                                                   0.0,0.0,1.0};
+// __device__ __constant__  static double v0[3][3] = {1.0,0.0,0.0,
+//                                                    0.0,1.0,0.0,
+//                                                    0.0,0.0,1.0};
+
+// __constant__ double v0[3][3];
 
 __global__
 void d_searchADTRegion(int ndim,int nelem,
@@ -22,7 +24,7 @@ void d_searchADTRegion(int ndim,int nelem,
 //for(int idx=0;idx < ntargets;idx++)
  if (i0 < ntargets)
  {
-   int idx = i0; //isorted[i0];
+   int idx = isorted[i0];
   //printf("---- GPU search --- \n");
   double vec[9];
   double xcloud[24];
@@ -31,6 +33,10 @@ void d_searchADTRegion(int ndim,int nelem,
   int nchecks;
   int p=0;
   double dmin[2];
+  double v0[3][3] = {1.0,0.0,0.0,
+                     0.0,1.0,0.0,
+                     0.0,0.0,1.0};
+
   //
   /*
   printf("%f %f %f\n",xtarget[3*idx],xtarget[3*idx+1],xtarget[3*idx+2]);
@@ -156,7 +162,12 @@ void dMeshBlock::search(void)
  int block_size = 512;
  int n_blocks = ntargets/block_size + (ntargets%block_size == 0 ? 0:1);
 
- int* isorted;
+ // double v0_cpu[3][3] = {1.0,0.0,0.0,
+ //                        0.0,1.0,0.0,
+ //                        0.0,0.0,1.0};
+ // cudaMemcpyToSymbol(v0, v0_cpu, 9*sizeof(double));
+
+ int* isorted = NULL;
  allocateOnDeviceInt(isorted,ntargets*sizeof(int)); 
  msort(xtarget, ntargets, isorted);
 
