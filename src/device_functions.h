@@ -2,7 +2,7 @@
 #include <cmath>
 
 #define NEQNS 12
-#define maxStackSize 32
+#define maxStackSize 256
 #define d_fabs(a) (a > 0 ? a:-a)
 
 void msort(double* xyz, int& n, int* isorted);
