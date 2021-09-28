@@ -5,6 +5,7 @@
 #define maxStackSize 256
 #define d_fabs(a) (a > 0 ? a:-a)
 
+void msort(double* xyz, int& n, int* isorted);
 
 __device__
 int d_boxRegionIntersect(double *x0,double *vec,double *bbox)

@@ -19,7 +19,9 @@ if (BUILD_GPU_CODE)
     # CUDA sources
     dMeshBlock.cu
     dADT.cu
+    morton.cu
     )
+  find_library(CUBLAS_LIB cublas ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 else()
   set(PIFUS_SOURCES ${PIFUS_SOURCES}
     dMeshBlock.C
@@ -29,7 +31,8 @@ endif()
 file(GLOB PIFUS_HEADERS *.h)
 
 add_library(pifus ${PIFUS_SOURCES})
-target_link_libraries(pifus ${MPI_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries(pifus ${MPI_LIBRARIES} ${CMAKE_DL_LIBS} ${CUBLAS_LIB})
+
 
 if (ENABLE_GPU_CODE)
   set_target_properties(pifus PROPERTIES

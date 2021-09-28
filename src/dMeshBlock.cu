@@ -6,18 +6,24 @@
 #include "pifus_cuda.h"
 #include "device_functions.h"
 
+__device__ __constant__  static double v0[3][3] = {1.0,0.0,0.0,
+                                                   0.0,1.0,0.0,
+                                                   0.0,0.0,1.0};
+
 __global__
 void d_searchADTRegion(int ndim,int nelem,
-     double *x, double *xtarget, int *adtIntegers, double *adtReals,double *adtExtents, 
-     double *coord,int *pcount, int *pindx, double *weights, int ntargets)
+                       double *x, double *xtarget, int* isorted, 
+                       int *adtIntegers, double *adtReals,double *adtExtents, 
+                       double *coord,int *pcount, int *pindx, double *weights, int ntargets)
 {
- int idx = blockIdx.x * blockDim.x + threadIdx.x;
+ int i0 = blockIdx.x * blockDim.x + threadIdx.x;
+
 //TRACEI(ntargets);
 //for(int idx=0;idx < ntargets;idx++)
- if (idx < ntargets)
+ if (i0 < ntargets)
  {
+   int idx = i0; //isorted[i0];
   //printf("---- GPU search --- \n");
-  double v0[3][3];
   double vec[9];
   double xcloud[24];
   int indx[9];	// 8+1 ... the +1 is a quick fix for memory issues
@@ -25,10 +31,6 @@ void d_searchADTRegion(int ndim,int nelem,
   int nchecks;
   int p=0;
   double dmin[2];
-  //
-  v0[0][0]=1.0;v0[1][0]=0.0;;v0[2][0]=0.0;
-  v0[0][1]=0.0;v0[1][1]=1.0;;v0[2][1]=0.0;
-  v0[0][2]=0.0;v0[1][2]=0.0;;v0[2][2]=1.0;
   //
   /*
   printf("%f %f %f\n",xtarget[3*idx],xtarget[3*idx+1],xtarget[3*idx+2]);
@@ -153,10 +155,16 @@ void dMeshBlock::search(void)
 
  int block_size = 512;
  int n_blocks = ntargets/block_size + (ntargets%block_size == 0 ? 0:1);
+
+ int* isorted;
+ allocateOnDeviceInt(isorted,ntargets*sizeof(int)); 
+ msort(xtarget, ntargets, isorted);
+
  d_searchADTRegion<<< n_blocks, block_size >>> 
                   (dadt->ndim,
                    dadt->nelem,
                    x,xtarget,
+                   isorted,
                    dadt->adtIntegers,
 		   dadt->adtReals,
                    dadt->adtExtents,
@@ -166,6 +174,8 @@ void dMeshBlock::search(void)
                    weights,
                    ntargets);
   cudaDeviceSynchronize();
+
+  deallocateDevice(isorted);
 
 
  /*
