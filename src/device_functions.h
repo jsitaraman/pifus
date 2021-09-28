@@ -289,6 +289,87 @@ void d_searchIntersections_norecursion(int *pointIndex,
     }
   return;
 }
+
+__device__
+void d_searchIntersections_norecursion_nostack(int *pointIndex,
+					       int *adtIntegers,
+					       double *adtReals,
+					       double *coord,
+					       int *ndes,
+					       double *xsearch,
+					       double *vec,
+					       int nelem,
+					       int ndim,
+					       int *nchecks)
+{
+  
+
+  int i,k,is;
+  int d,nodeChild;
+  double element[6];
+  double dv[3];
+  double dtest,bdist;
+  int mm=0;
+  int nstack=1;
+  double dmin[2];
+
+  //typedef struct nodestack{
+  //  int val;
+  //  struct nodestack* next;
+  //} nstack;  
+  //
+  int node=0;
+  int level=0;
+  dmin[0]=dmin[1]=PIFUS_BIGVALUE;
+  pointIndex[0]=pointIndex[1]=-1;
+
+
+  while(node < nelem) {    
+    // pull the region corresponding to this node
+    for(i=0;i<ndim;i++)
+      element[i]=adtReals[ndim*node+i];
+    // check if the given search point is in this region
+    if (d_boxRegionIntersect(xsearch,vec,element)) {
+      {
+	// if yes, get the actual point in this node
+	for(i=0;i<ndim;i++)
+	  element[i]=coord[ndim*(adtIntegers[4*node])+i];
+	//
+	for(k=0;k<3;k++) 
+	  dv[k]=(element[0]-xsearch[0])*vec[3*k]+
+	    (element[1]-xsearch[1])*vec[3*k+1]+
+	    (element[2]-xsearch[2])*vec[3*k+2];
+	//
+	if (dv[0] > 0 && dv[1] > 0 && dv[2] > 0) 
+	  {
+	    (*nchecks)++;
+	    dtest=(element[0]-xsearch[0])*(element[0]-xsearch[0])+
+	      (element[1]-xsearch[1])*(element[1]-xsearch[1])+
+	      (element[2]-xsearch[2])*(element[2]-xsearch[2]);
+	    if (dtest < dmin[0]) 
+	      {
+		pointIndex[1]=pointIndex[0];
+		dmin[1]=dmin[0];
+		pointIndex[0]=adtIntegers[4*node];
+		dmin[0]=dtest;
+	      }
+	    else if (dtest < dmin[1])
+	      {
+		pointIndex[1]=adtIntegers[4*node];
+		dmin[1]=dtest;
+	      }
+	    //TRACEI(nchecks);
+	  }
+	node=node+1;
+      }    
+      else {
+	node=node+ndes[node];
+      }
+    }
+  }
+  return;
+}
+
 __device__
 void d_searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,double *adtReals,
 				double *coord,int level,int node,double *dmin,

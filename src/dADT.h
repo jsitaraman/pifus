@@ -17,6 +17,7 @@ public:
   double* adtReals{nullptr};   /**< real numbers that provide the extents of each box */
   double* adtExtents{nullptr}; /**< global extents */
   double* coord{nullptr};      /**< bounding box of each element */
+  int *ndescendents{nullptr};  /**< number of descendents of each ADT node */
 
   dADT(){};
 
@@ -26,7 +27,8 @@ public:
     int* adtIntegersInput,
     double* adtRealsInput,
     double* adtExtentsInput,
-    double* coordInput);
+    double* coordInput,
+    int *ndescendents);
   void clearData(void);
   // void buildADT(int d,int nelements,double *elementBbox);
   // void searchADTRegion(int *elemid,double *xsearch,double *vec);

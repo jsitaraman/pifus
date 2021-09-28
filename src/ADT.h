@@ -20,6 +20,7 @@ class ADT
   double *adtReals;  /** < real numbers that provide the extents of each box */
   double *adtExtents; /** < global extents */
   double *coord;          /** < bounding box of each element */
+  int *ndescendents;      /** < number of descendents per node */
 
  public :
   ADT() {ndim=6;nelem=0;adtIntegers=NULL;adtReals=NULL;adtExtents=NULL;coord=NULL;};
@@ -46,6 +47,7 @@ class ADT
   double *getadtReals(void) {return adtReals;}
   double *getadtExtents(void) {return adtExtents;}
   double *getadtcoord(void) {return coord;}
+  int *getdescendents(void) {return ndescendents;}
   void buildADT(int d,int nelements,double *elementBbox);  
   void searchADTRegion(int *elemid,double *xsearch,double *vec);
 };

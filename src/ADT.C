@@ -9,6 +9,21 @@
 
 namespace PIFUS {
 
+
+void traverse(int *adtIntegers,int nodeid, int *ndescent)
+ {
+   int d,nodeChild;
+   ndescent[nodeid]=1;
+   for(d=1;d<3;d++)
+     {
+       if (adtIntegers[4*nodeid+d] > -1) {
+	 nodeChild=adtIntegers[4*adtIntegers[4*nodeid+d]+3];
+	 traverse(adtIntegers,nodeChild,ndescent);
+	 ndescent[nodeid]+=ndescent[nodeChild];
+       }
+     }
+}
+
 void ADT::buildADT(int d, int nelements,double *elementBbox)
 {
   int i,i2,j6,j,i4;
@@ -38,6 +53,8 @@ void ADT::buildADT(int d, int nelements,double *elementBbox)
   adtIntegers=(int *) malloc(sizeof(int)*4*nelem);
   if (adtReals) free(adtReals);
   adtReals=(double *) malloc(sizeof(double)*nelem*ndim);
+  if (ndescendents) free(ndescendents);
+  ndescendents=(int *) malloc(sizeof(int)*nelem);
   /*
    * Determine extent of elements
    */
@@ -97,6 +114,8 @@ void ADT::buildADT(int d, int nelements,double *elementBbox)
       i4=4*adtIntegers[4*i];
       adtIntegers[i4+3]=i;
     }
+
+  traverse(adtIntegers,0,ndescendents);
 
 #if 0
   FILE *fp,*fp1;

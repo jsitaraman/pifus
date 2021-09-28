@@ -5,7 +5,7 @@
 namespace PIFUS {
 
 void dADT::setHostTree(int nelemInput,int *adtIntegersInput, double *adtRealsInput,
-                            double *adtExtentsInput, double *coordInput)
+                            double *adtExtentsInput, double *coordInput, int *ndesc)
 {
 
 nelem=nelemInput;
@@ -14,6 +14,7 @@ pushToDeviceInt(adtIntegers,adtIntegersInput,4*nelem*sizeof(int));
 pushToDeviceDouble(adtReals,adtRealsInput,ndim*nelem*sizeof(double));
 pushToDeviceDouble(adtExtents,adtExtentsInput,ndim*sizeof(double));
 pushToDeviceDouble(coord,coordInput,ndim*nelem*sizeof(double));
+pushToDeviceInt(ndescendents,ndesc,nelem*sizeof(int));
 
 /*
 int isize=4*nelem*sizeof(int);
