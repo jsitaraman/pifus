@@ -23,7 +23,7 @@ class ADT
   int *ndescendents;      /** < number of descendents per node */
 
  public :
-  ADT() {ndim=6;nelem=0;adtIntegers=NULL;adtReals=NULL;adtExtents=NULL;coord=NULL;};
+  ADT() {ndim=6;nelem=0;adtIntegers=NULL;adtReals=NULL;adtExtents=NULL;coord=NULL;ndescendents=NULL;};
   ~ADT() 
     {
       if (adtIntegers) free(adtIntegers);
@@ -32,15 +32,18 @@ class ADT
       adtIntegers=NULL;
       adtReals=NULL;
       adtExtents=NULL;
+      ndescendents=NULL;
     };
   void clearData(void)
     {
       if (adtIntegers) free(adtIntegers);
       if (adtReals) free(adtReals);
       if (adtExtents) free(adtExtents);
+      if (ndescendents) free(ndescendents);
       adtIntegers=NULL;
       adtReals=NULL;
       adtExtents=NULL;
+      ndescendents=NULL;
     };      
   int *getadtIntegers(void) { return adtIntegers;}
   int getadtnelem(void) {return nelem;}

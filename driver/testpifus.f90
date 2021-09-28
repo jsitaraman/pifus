@@ -53,7 +53,7 @@ program testpifus
  !
  bid=1
  nvar=1
- m=n
+ m=1
  call pifus_init()
  call pifus_use_timer()
  call pifus_register_source(bid,x,n)

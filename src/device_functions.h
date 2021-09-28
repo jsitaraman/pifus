@@ -2,7 +2,7 @@
 #include <cmath>
 
 #define NEQNS 12
-#define maxStackSize 32
+#define maxStackSize 256
 #define d_fabs(a) (a > 0 ? a:-a)
 
 void msort(double* xyz, int& n, int* isorted);
@@ -152,8 +152,10 @@ void d_interprbf(double *xcloud, double *P,double *weights,int np,int itype, int
   double dd;
   int neqns=np+4;
   //TRACEI(np);
+  //printf("%p\n",xcloud);
   for(i=0;i<np;i++)
     {
+      printf("%f %f %f\n",xcloud[3*i],xcloud[3*i+1],xcloud[3*i+2]);
       for(j=0;j<np;j++)
 	{
 	  dd=0;
@@ -172,14 +174,14 @@ void d_interprbf(double *xcloud, double *P,double *weights,int np,int itype, int
 	M[i][j]=0.0;
       B[i]=(i==np)?1.0:P[i-(np+1)];
     }
-  /*
+ /* 
   for(i=0;i<np+4;i++)
    {
     for(j=0;j<np+4;j++)
       printf("%8.4f ", M[i][j]);
     printf("\n");
-   }
-  */
+   }*/
+  
   d_solvec(M,B,iflag,neqns);
   for(i=0;i<np;i++) weights[i]=B[i];
 }
@@ -363,6 +365,7 @@ void d_searchIntersections_norecursion_nostack(int *pointIndex,
     	node=node+1;
       }
       else {
+        printf("%d %d\n",node,ndes[node]);
     	node=node+ndes[node];
       }
   }
