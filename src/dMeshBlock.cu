@@ -26,7 +26,7 @@ void d_searchADTRegion(int ndim,int nelem,
 //for(int idx=0;idx < ntargets;idx++)
  if (i0 < ntargets)
  {
-   int idx = i0; //isorted[i0];
+   int idx = isorted[i0];
   //printf("---- GPU search --- \n");
   double vec[9];
   double xcloud[24];
@@ -61,21 +61,22 @@ void d_searchADTRegion(int ndim,int nelem,
                 indx[p]=indx[p+1]=-1;
 		dmin[0]=dmin[1]=PIFUS_BIGVALUE;
 		//searchIntersections_region_norecursion(&(indx[p]),adtIntegers,adtReals,
-		//	     coord,0,0,dmin,&(xtarget[3*idx]),vec,nelem,ndim,
-                //             &nchecks);
-		//d_searchIntersections_norecursion(&(indx[p]),adtIntegers,adtReals,coord,
-                //                            &(xtarget[3*idx]),vec,nelem,ndim,&nchecks);
+		///	     coord,0,0,dmin,&(xtarget[3*idx]),vec,nelem,ndim,
+		                //             &nchecks);
+		d_searchIntersections_norecursion(&(indx[p]),adtIntegers,adtReals,coord,
+                                          &(xtarget[3*idx]),vec,nelem,ndim,&nchecks);
 
-                d_searchIntersections_norecursion_nostack(&(indx[p]),adtIntegers,adtReals,coord,ndes,
-                                                 &(xtarget[3*idx]),vec,nelem,ndim,&nchecks);
+                //d_searchIntersections_norecursion_nostack(&(indx[p]),adtIntegers,
+		//                                           adtReals,coord,ndes,
+                //                                 &(xtarget[3*idx]),vec,nelem,ndim,&nchecks);
 
-		printf("pointIndex, nchecks=%d %d\n",indx[p],nchecks);
+         	//printf("pointIndex, nchecks=%d %d\n",indx[p],nchecks);
               p++;
             }
     int m=0;
-    TRACED(xtarget[3*idx]);
-    TRACED(xtarget[3*idx+1]);
-    TRACED(xtarget[3*idx+2]);
+    //TRACED(xtarget[3*idx]);
+    //TRACED(xtarget[3*idx+1]);
+    //TRACED(xtarget[3*idx+2]);
     for(p=0;p<np;p++)
      {
        if (indx[p] > -1) {
@@ -88,9 +89,9 @@ void d_searchADTRegion(int ndim,int nelem,
     int iflag;
     pcount[idx]=m/3;
     //TRACEI(pcount[idx]);
-    for(p=0;p<m/3;p++) {
-     printf("xcloud: %f %f %f\n",xcloud[3*p],xcloud[3*p+1],xcloud[3*p+2]);
-    }
+    //for(p=0;p<m/3;p++) {
+    // printf("xcloud: %f %f %f\n",xcloud[3*p],xcloud[3*p+1],xcloud[3*p+2]);
+    //}
     //printf("pointer=%p\n",xcloud);
     d_interprbf(xcloud,&(xtarget[3*idx]),&(weights[8*idx]),pcount[idx],itype,&iflag);
     for(p=0;p<m/3;p++) pindx[8*idx+p]=indx[p];
@@ -172,7 +173,7 @@ void dMeshBlock::search(void)
  allocateOnDeviceInt(pindx,8*ntargets*sizeof(int));
  allocateOnDeviceInt(pcount,ntargets*sizeof(int));
 
- int block_size = 128;
+ int block_size = 512;
  int n_blocks = ntargets/block_size + (ntargets%block_size == 0 ? 0:1);
 
  // double v0_cpu[3][3] = {1.0,0.0,0.0,
@@ -181,8 +182,8 @@ void dMeshBlock::search(void)
  // cudaMemcpyToSymbol(v0, v0_cpu, 9*sizeof(double));
 
  int* isorted = NULL;
- //allocateOnDeviceInt(isorted,ntargets*sizeof(int)); 
- //msort(xtarget, ntargets, isorted);
+ allocateOnDeviceInt(isorted,ntargets*sizeof(int)); 
+ msort(xtarget, ntargets, isorted);
 
  d_searchADTRegion<<< n_blocks, block_size >>> 
                   (dadt->ndim,
@@ -200,7 +201,7 @@ void dMeshBlock::search(void)
                    ntargets);
   cudaDeviceSynchronize();
 
-  //deallocateDevice(isorted);
+  deallocateDevice(isorted);
 
 
  /*

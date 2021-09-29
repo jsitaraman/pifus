@@ -17,7 +17,8 @@ void traverse(int *adtIntegers,int nodeid, int *ndescent)
    for(d=1;d<3;d++)
      {
        if (adtIntegers[4*nodeid+d] > -1) {
-	 nodeChild=adtIntegers[4*adtIntegers[4*nodeid+d]+3];
+	 //nodeChild=adtIntegers[4*adtIntegers[4*nodeid+d]+3];
+	 nodeChild=adtIntegers[4*nodeid+d];
 	 traverse(adtIntegers,nodeChild,ndescent);
 	 ndescent[nodeid]+=ndescent[nodeChild];
        }
@@ -115,8 +116,15 @@ void ADT::buildADT(int d, int nelements,double *elementBbox)
       adtIntegers[i4+3]=i;
     }
 
-  traverse(adtIntegers,0,ndescendents);
+  
+  for(i=0;i<nelem;i++) 
+    for(j=1;j<3;j++) {
+      if (adtIntegers[4*i+j] > -1) 
+	adtIntegers[4*i+j]=adtIntegers[4*adtIntegers[4*i+j]+3];
+    }
 
+  traverse(adtIntegers,0,ndescendents);
+  
 #if 0
   FILE *fp,*fp1;
   fp=fopen("adtReals.dat","w");

@@ -117,7 +117,7 @@ void searchIntersections_region(int *pointIndex,int *adtIntegers,double *adtReal
 	  pointIndex[1]=adtIntegers[4*node];
 	  dmin[1]=dtest;
 	}
-       //TRACEI(nchecks);
+      //TRACEI(nchecks);
     }
   //
   // check the left and right children
@@ -128,7 +128,7 @@ void searchIntersections_region(int *pointIndex,int *adtIntegers,double *adtReal
     {
       nodeChild=adtIntegers[4*node+d];
       if (nodeChild > -1) {
-        nodeChild=adtIntegers[4*nodeChild+3];
+        //nodeChild=adtIntegers[4*nodeChild+3];
 	for(i=0;i<ndim;i++)
          {
 	  element[i]=adtReals[ndim*nodeChild+i];
@@ -212,7 +212,7 @@ void searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,dou
 	    {
 	      nodeChild=adtIntegers[4*node+d];
 	      if (nodeChild > -1) {
-		nodeChild=adtIntegers[4*nodeChild+3];
+		//nodeChild=adtIntegers[4*nodeChild+3];
 		for(i=0;i<ndim;i++)
 		  {
 		    element[i]=adtReals[ndim*nodeChild+i];

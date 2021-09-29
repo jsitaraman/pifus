@@ -155,7 +155,7 @@ void d_interprbf(double *xcloud, double *P,double *weights,int np,int itype, int
   //printf("%p\n",xcloud);
   for(i=0;i<np;i++)
     {
-      printf("%f %f %f\n",xcloud[3*i],xcloud[3*i+1],xcloud[3*i+2]);
+      //printf("%f %f %f\n",xcloud[3*i],xcloud[3*i+1],xcloud[3*i+2]);
       for(j=0;j<np;j++)
 	{
 	  dd=0;
@@ -265,18 +265,21 @@ void d_searchIntersections_norecursion(int *pointIndex,
 	    {
 	      nodeChild=adtIntegers[4*node+d];
 	      if (nodeChild > -1) {
-		nodeChild=adtIntegers[4*nodeChild+3];
+		//nodeChild=adtIntegers[4*nodeChild+3];
+		//printf("child(%d) : %d\n",d,nodeChild);
 		for(i=0;i<ndim;i++)
 		  {
 		    element[i]=adtReals[ndim*nodeChild+i];
 		  }
-                //printf("nodeChild,d_boxRegionIntersect: %d %d\n",nodeChild,d_boxRegionIntersect(xsearch,vec,element));
+
 		if (d_boxRegionIntersect(xsearch,vec,element))
 		  {
 		    bdist=d_boxdist2(xsearch,element);
+             
 		    if (bdist < dmin[0] || bdist < dmin[1]) 
 		      {
 			nodeStack[mm+nstack]=nodeChild;
+                        //printf("st: %d\n",nodeStack[mm+nstack]);
 			mm++;
 		      }
 		  }
@@ -331,134 +334,54 @@ void d_searchIntersections_norecursion_nostack(int *pointIndex,
     for(i=0;i<ndim;i++)
       element[i]=adtReals[ndim*node+i];
     // check if the given search point is in this region
+    // printf("node: %d\n",node);
     if (d_boxRegionIntersect(xsearch,vec,element)) 
       {
-    	// if yes, get the actual point in this node
-    	for(i=0;i<ndim;i++)
-    	  element[i]=coord[ndim*(adtIntegers[4*node])+i];
-    	//
-    	for(k=0;k<3;k++)
-    	  dv[k]=(element[0]-xsearch[0])*vec[3*k]+
-    	    (element[1]-xsearch[1])*vec[3*k+1]+
-    	    (element[2]-xsearch[2])*vec[3*k+2];
-    	//
-    	if (dv[0] > 0 && dv[1] > 0 && dv[2] > 0)
-    	  {
-    	    (*nchecks)++;
-    	    dtest=(element[0]-xsearch[0])*(element[0]-xsearch[0])+
-    	      (element[1]-xsearch[1])*(element[1]-xsearch[1])+
-    	      (element[2]-xsearch[2])*(element[2]-xsearch[2]);
-    	    if (dtest < dmin[0])
-    	      {
-    		pointIndex[1]=pointIndex[0];
-    		dmin[1]=dmin[0];
-    		pointIndex[0]=adtIntegers[4*node];
-    		dmin[0]=dtest;
-    	      }
-    	    else if (dtest < dmin[1])
-    	      {
-    		pointIndex[1]=adtIntegers[4*node];
-    		dmin[1]=dtest;
-    	      }
-    	    //TRACEI(nchecks);
-    	  }
-    	node=node+1;
+	// check if the region containing node is closer
+	// than the currently held distance
+        bdist=d_boxdist2(xsearch,element);
+	if (bdist < dmin[0] || bdist < dmin[1])
+	  {
+	    // if yes, get the actual point in this node
+	    for(i=0;i<ndim;i++)
+	      element[i]=coord[ndim*(adtIntegers[4*node])+i];
+	    //
+	    for(k=0;k<3;k++)
+	      dv[k]=(element[0]-xsearch[0])*vec[3*k]+
+		(element[1]-xsearch[1])*vec[3*k+1]+
+		(element[2]-xsearch[2])*vec[3*k+2];
+	    //
+	    if (dv[0] > 0 && dv[1] > 0 && dv[2] > 0)
+	      {
+		(*nchecks)++;
+		dtest=(element[0]-xsearch[0])*(element[0]-xsearch[0])+
+		  (element[1]-xsearch[1])*(element[1]-xsearch[1])+
+		  (element[2]-xsearch[2])*(element[2]-xsearch[2]);
+		if (dtest < dmin[0])
+		  {
+		    pointIndex[1]=pointIndex[0];
+		    dmin[1]=dmin[0];
+		    pointIndex[0]=adtIntegers[4*node];
+		    dmin[0]=dtest;
+		  }
+		else if (dtest < dmin[1])
+		  {
+		    pointIndex[1]=adtIntegers[4*node];
+		    dmin[1]=dtest;
+		  }
+		//TRACEI(nchecks);
+	      }
+	    node=node+1;
+	  }
+	else {
+	  node=node+ndes[node];
+	}
       }
       else {
-        printf("%d %d\n",node,ndes[node]);
+        //printf("%d %d\n",node,ndes[node]);
     	node=node+ndes[node];
       }
   }
   return;
 }
 
-__device__
-void d_searchIntersections_region_norecursion(int *pointIndex,int *adtIntegers,double *adtReals,
-				double *coord,int level,int node,double *dmin,
-				double *xsearch,double *vec,int nelem,int ndim,int *nchecks)
-{
-  int i,k,is;
-  int d,nodeChild;
-  double element[6];
-  double dv[3];
-  double dtest,bdist;
-  int nodeStack[maxStackSize];
-  int mm=0;
-  int nstack=1;
-
-  //typedef struct nodestack{
-  //  int val;
-  //  struct nodestack* next;
-  //} nstack;  
-  //
-  nodeStack[0]=node;
-  
-  while(nstack > 0) 
-    {
-      mm=0;
-      for(is=0;is<nstack;is++)
-	{
-	  node=nodeStack[is];
-	  for(i=0;i<ndim;i++)
-	    element[i]=coord[ndim*(adtIntegers[4*node])+i];
-	  //
-	  for(k=0;k<3;k++) 
-	    dv[k]=(element[0]-xsearch[0])*vec[3*k]+
-	      (element[1]-xsearch[1])*vec[3*k+1]+
-	      (element[2]-xsearch[2])*vec[3*k+2];
-	  //
-	  if (dv[0] > 0 && dv[1] > 0 && dv[2] > 0) 
-	    {
-	      (*nchecks)++;
-	      dtest=(element[0]-xsearch[0])*(element[0]-xsearch[0])+
-		(element[1]-xsearch[1])*(element[1]-xsearch[1])+
-		(element[2]-xsearch[2])*(element[2]-xsearch[2]);
-	      if (dtest < dmin[0]) 
-		{
-		  pointIndex[1]=pointIndex[0];
-		  dmin[1]=dmin[0];
-		  pointIndex[0]=adtIntegers[4*node];
-		  dmin[0]=dtest;
-		}
-	      else if (dtest < dmin[1])
-		{
-		  pointIndex[1]=adtIntegers[4*node];
-		  dmin[1]=dtest;
-		}
-	      //TRACEI(nchecks);
-	    }
-	  
-	  //
-	  // check the left and right children
-	  // now and sort based on distance if it is
-	  // within the given octant
-	  //
-	  for(d=1;d<3;d++)
-	    {
-	      nodeChild=adtIntegers[4*node+d];
-	      if (nodeChild > -1) {
-		nodeChild=adtIntegers[4*nodeChild+3];
-		for(i=0;i<ndim;i++)
-		  {
-		    element[i]=adtReals[ndim*nodeChild+i];
-		  }
-		if (d_boxRegionIntersect(xsearch,vec,element))
-		  {
-		    bdist=d_boxdist2(xsearch,element);
-		    if (bdist < dmin[0] || bdist < dmin[1]) 
-		      {
-			nodeStack[mm+nstack]=nodeChild;
-			mm++;
-		      }
-		  }
-	      }
-	    }
-	}
-      //printf("mm=%d\n",mm);
-      for(int j=0;j<mm;j++)
-         nodeStack[j]=nodeStack[j+nstack];
-      nstack=mm;
-      level++;
-    }
-  return;
-}
